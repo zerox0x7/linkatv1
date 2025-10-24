@@ -439,7 +439,7 @@
                         </div>
                         
                         @if(view()->exists($layoutComponent))
-                            @include($layoutComponent, ['layoutBoxes' => $layoutBoxes])
+                            @include($layoutComponent, ['layoutBoxes' => $layoutBoxes, 'imageSizes' => $imageSizes])
                         @else
                             <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400">
                                 <div class="flex items-center gap-2 mb-2">

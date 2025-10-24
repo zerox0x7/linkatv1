@@ -1,5 +1,5 @@
 {{-- Torganic Theme Layout Simulation --}}
-@props(['layoutBoxes'])
+@props(['layoutBoxes', 'imageSizes'])
 
 <div class="space-y-3">
     <!-- Row 1: Large Hero + 2 Side Boxes -->
@@ -14,6 +14,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box0 = collect($layoutBoxes)->firstWhere('order', 0);
+                $sizeLabel = $imageSizes[1] ?? 'Large - #1';
             @endphp
             @if($box0)
                 <div class="layout-box" draggable="true"
@@ -28,8 +29,8 @@
                         @endif
                         <div class="layout-box-info">
                             <div class="layout-box-badge">#1</div>
-                            <h5 class="layout-box-title">{{ $box0['title'] ?: 'Hero Principal' }}</h5>
-                            <p class="layout-box-type">Hero Principal</p>
+                            <h5 class="layout-box-title">{{ $box0['image_size'] ?? $sizeLabel }}</h5>
+                            <p class="layout-box-type">{{ $box0['image_size'] ?? $sizeLabel }}</p>
                             <button type="button" wire:click="selectBox('{{ $box0['id'] }}')" class="layout-box-edit">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -39,8 +40,8 @@
             @else
                 <div class="layout-empty">
                     <i class="ri-drag-drop-line text-2xl"></i>
-                    <p>Hero Principal</p>
-                    <span class="text-xs">#1 - Large</span>
+                    <p>{{ $sizeLabel }}</p>
+                    <span class="text-xs">#1</span>
                 </div>
             @endif
         </div>
@@ -57,6 +58,7 @@
                  :class="isOver ? 'border-primary bg-primary/5' : ''">
                 @php
                     $box1 = collect($layoutBoxes)->firstWhere('order', 1);
+                    $sizeLabel1 = $imageSizes[2] ?? '#2';
                 @endphp
                 @if($box1)
                     <div class="layout-box layout-box-small" draggable="true"
@@ -67,7 +69,7 @@
                             @endif
                             <div class="layout-box-info-compact">
                                 <span class="layout-box-badge-small">#2</span>
-                                <h5 class="layout-box-title-small">{{ $box1['title'] ?: 'Top Right' }}</h5>
+                                <h5 class="layout-box-title-small">{{ $box1['image_size'] ?? $sizeLabel1 }}</h5>
                                 <button type="button" wire:click="selectBox('{{ $box1['id'] }}')" class="layout-box-edit-small">
                                     <i class="ri-edit-line"></i>
                                 </button>
@@ -77,7 +79,7 @@
                 @else
                     <div class="layout-empty layout-empty-small">
                         <i class="ri-drag-drop-line"></i>
-                        <p class="text-xs">Top Right</p>
+                        <p class="text-xs">{{ $sizeLabel1 }}</p>
                         <span class="text-xs">#2</span>
                     </div>
                 @endif
@@ -93,6 +95,7 @@
                  :class="isOver ? 'border-primary bg-primary/5' : ''">
                 @php
                     $box2 = collect($layoutBoxes)->firstWhere('order', 2);
+                    $sizeLabel2 = $imageSizes[3] ?? '#3';
                 @endphp
                 @if($box2)
                     <div class="layout-box layout-box-small" draggable="true"
@@ -103,7 +106,7 @@
                             @endif
                             <div class="layout-box-info-compact">
                                 <span class="layout-box-badge-small">#3</span>
-                                <h5 class="layout-box-title-small">{{ $box2['title'] ?: 'Bottom Right' }}</h5>
+                                <h5 class="layout-box-title-small">{{ $box2['image_size'] ?? $sizeLabel2 }}</h5>
                                 <button type="button" wire:click="selectBox('{{ $box2['id'] }}')" class="layout-box-edit-small">
                                     <i class="ri-edit-line"></i>
                                 </button>
@@ -113,7 +116,7 @@
                 @else
                     <div class="layout-empty layout-empty-small">
                         <i class="ri-drag-drop-line"></i>
-                        <p class="text-xs">Bottom Right</p>
+                        <p class="text-xs">{{ $sizeLabel2 }}</p>
                         <span class="text-xs">#3</span>
                     </div>
                 @endif
@@ -133,6 +136,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box3 = collect($layoutBoxes)->firstWhere('order', 3);
+                $sizeLabel3 = $imageSizes[4] ?? '#4';
             @endphp
             @if($box3)
                 <div class="layout-box layout-box-small" draggable="true"
@@ -143,7 +147,7 @@
                         @endif
                         <div class="layout-box-info-compact">
                             <span class="layout-box-badge-small">#4</span>
-                            <h5 class="layout-box-title-small">{{ $box3['title'] ?: 'Left Side' }}</h5>
+                            <h5 class="layout-box-title-small">{{ $box3['image_size'] ?? $sizeLabel3 }}</h5>
                             <button type="button" wire:click="selectBox('{{ $box3['id'] }}')" class="layout-box-edit-small">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -153,7 +157,7 @@
             @else
                 <div class="layout-empty layout-empty-small">
                     <i class="ri-drag-drop-line"></i>
-                    <p class="text-xs">Left</p>
+                    <p class="text-xs">{{ $sizeLabel3 }}</p>
                     <span class="text-xs">#4</span>
                 </div>
             @endif
@@ -169,6 +173,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box4 = collect($layoutBoxes)->firstWhere('order', 4);
+                $sizeLabel4 = $imageSizes[5] ?? '#5';
             @endphp
             @if($box4)
                 <div class="layout-box layout-box-medium" draggable="true"
@@ -179,8 +184,8 @@
                         @endif
                         <div class="layout-box-info">
                             <div class="layout-box-badge">#5</div>
-                            <h5 class="layout-box-title">{{ $box4['title'] ?: 'Center Large' }}</h5>
-                            <p class="layout-box-type">Large Center</p>
+                            <h5 class="layout-box-title">{{ $box4['image_size'] ?? $sizeLabel4 }}</h5>
+                            <p class="layout-box-type">{{ $box4['image_size'] ?? $sizeLabel4 }}</p>
                             <button type="button" wire:click="selectBox('{{ $box4['id'] }}')" class="layout-box-edit">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -190,7 +195,7 @@
             @else
                 <div class="layout-empty">
                     <i class="ri-drag-drop-line text-2xl"></i>
-                    <p>Center Large</p>
+                    <p>{{ $sizeLabel4 }}</p>
                     <span class="text-xs">#5</span>
                 </div>
             @endif
@@ -206,6 +211,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box5 = collect($layoutBoxes)->firstWhere('order', 5);
+                $sizeLabel5 = $imageSizes[6] ?? '#6';
             @endphp
             @if($box5)
                 <div class="layout-box layout-box-small" draggable="true"
@@ -216,7 +222,7 @@
                         @endif
                         <div class="layout-box-info-compact">
                             <span class="layout-box-badge-small">#6</span>
-                            <h5 class="layout-box-title-small">{{ $box5['title'] ?: 'Right Side' }}</h5>
+                            <h5 class="layout-box-title-small">{{ $box5['image_size'] ?? $sizeLabel5 }}</h5>
                             <button type="button" wire:click="selectBox('{{ $box5['id'] }}')" class="layout-box-edit-small">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -226,7 +232,7 @@
             @else
                 <div class="layout-empty layout-empty-small">
                     <i class="ri-drag-drop-line"></i>
-                    <p class="text-xs">Right</p>
+                    <p class="text-xs">{{ $sizeLabel5 }}</p>
                     <span class="text-xs">#6</span>
                 </div>
             @endif
@@ -245,6 +251,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box6 = collect($layoutBoxes)->firstWhere('order', 6);
+                $sizeLabel6 = $imageSizes[7] ?? '#7';
             @endphp
             @if($box6)
                 <div class="layout-box layout-box-medium" draggable="true"
@@ -255,7 +262,7 @@
                         @endif
                         <div class="layout-box-info">
                             <div class="layout-box-badge">#7</div>
-                            <h5 class="layout-box-title">{{ $box6['title'] ?: 'Secondary 1' }}</h5>
+                            <h5 class="layout-box-title">{{ $box6['image_size'] ?? $sizeLabel6 }}</h5>
                             <button type="button" wire:click="selectBox('{{ $box6['id'] }}')" class="layout-box-edit">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -265,7 +272,7 @@
             @else
                 <div class="layout-empty">
                     <i class="ri-drag-drop-line"></i>
-                    <p class="text-sm">Secondary 1</p>
+                    <p class="text-sm">{{ $sizeLabel6 }}</p>
                     <span class="text-xs">#7</span>
                 </div>
             @endif
@@ -281,6 +288,7 @@
              :class="isOver ? 'border-primary bg-primary/5' : ''">
             @php
                 $box7 = collect($layoutBoxes)->firstWhere('order', 7);
+                $sizeLabel7 = $imageSizes[8] ?? '#8';
             @endphp
             @if($box7)
                 <div class="layout-box layout-box-medium" draggable="true"
@@ -291,7 +299,7 @@
                         @endif
                         <div class="layout-box-info">
                             <div class="layout-box-badge">#8</div>
-                            <h5 class="layout-box-title">{{ $box7['title'] ?: 'Secondary 2' }}</h5>
+                            <h5 class="layout-box-title">{{ $box7['image_size'] ?? $sizeLabel7 }}</h5>
                             <button type="button" wire:click="selectBox('{{ $box7['id'] }}')" class="layout-box-edit">
                                 <i class="ri-edit-line"></i>
                             </button>
@@ -301,7 +309,7 @@
             @else
                 <div class="layout-empty">
                     <i class="ri-drag-drop-line"></i>
-                    <p class="text-sm">Secondary 2</p>
+                    <p class="text-sm">{{ $sizeLabel7 }}</p>
                     <span class="text-xs">#8</span>
                 </div>
             @endif
@@ -318,6 +326,7 @@
          :class="isOver ? 'border-primary bg-primary/5' : ''">
         @php
             $box8 = collect($layoutBoxes)->firstWhere('order', 8);
+            $sizeLabel8 = $imageSizes[9] ?? '#9';
         @endphp
         @if($box8)
             <div class="layout-box layout-box-large" draggable="true"
@@ -328,8 +337,8 @@
                     @endif
                     <div class="layout-box-info">
                         <div class="layout-box-badge">#9</div>
-                        <h5 class="layout-box-title">{{ $box8['title'] ?: 'Full Width Banner' }}</h5>
-                        <p class="layout-box-type">Full Width</p>
+                        <h5 class="layout-box-title">{{ $box8['image_size'] ?? $sizeLabel8 }}</h5>
+                        <p class="layout-box-type">{{ $box8['image_size'] ?? $sizeLabel8 }}</p>
                         <button type="button" wire:click="selectBox('{{ $box8['id'] }}')" class="layout-box-edit">
                             <i class="ri-edit-line"></i>
                         </button>
@@ -339,8 +348,8 @@
         @else
             <div class="layout-empty">
                 <i class="ri-drag-drop-line text-2xl"></i>
-                <p>Full Width Banner</p>
-                <span class="text-xs">#9 - Extra Large</span>
+                <p>{{ $sizeLabel8 }}</p>
+                <span class="text-xs">#9</span>
             </div>
         @endif
     </div>

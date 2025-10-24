@@ -40,6 +40,7 @@ class ThemeCustomizer extends Component
     public $layoutBoxes = [];
     public $selectedBox = null;
     public $boxLayouts = [];
+    public $imageSizes = [];  // Image sizes from themes_info table
     
     // Extra images
     public $extraImages = [];
@@ -187,19 +188,38 @@ class ThemeCustomizer extends Component
         // Get the layout configuration for the current theme
         $this->boxLayouts = $this->getThemeLayoutConfig();
         
-        foreach ($this->heroSlides as $index => $slide) {
+        // Get theme info to retrieve image sizes
+        $themeInfo = \App\Models\ThemesInfo::getBySlug($this->themeName) 
+                  ?? \App\Models\ThemesInfo::getByName($this->themeName);
+        
+        // Get all image sizes mapped by order
+        $this->imageSizes = $themeInfo ? $themeInfo->getAllImageSizes() : [];
+        
+        // Sort heroSlides by their saved order before loading them
+        $sortedSlides = collect($this->heroSlides)->sortBy(function($slide) {
+            return $slide['order'] ?? 999; // Put slides without order at the end
+        })->values()->all();
+        
+        foreach ($sortedSlides as $index => $slide) {
             // Each slide is a static box
+            // Use the saved order from the slide, not the array index
+            $savedOrder = $slide['order'] ?? $index;
+            
+            // Get the image size for this position (order + 1 because themes_info uses 1-based indexing)
+            $imageSize = $this->imageSizes[$savedOrder + 1] ?? null;
+            
             $this->layoutBoxes[] = [
                 'id' => $slide['id'] ?? 'box-' . $index,
-                'order' => $index,
+                'order' => $savedOrder,  // Use saved order from database
                 'title' => $slide['title'] ?? '',
                 'subtitle' => $slide['subtitle'] ?? '',
                 'button_text' => $slide['button_text'] ?? '',
                 'button_link' => $slide['button_link'] ?? '',
                 'image' => $slide['image'] ?? null,
                 'image_preview' => $slide['image_preview'] ?? null,
-                'layout_type' => $this->detectBoxLayoutType($index),
+                'layout_type' => $this->detectBoxLayoutType($savedOrder),  // Use saved order for layout type
                 'extra_fields' => $this->getExtraFields($slide),
+                'image_size' => $imageSize,  // Add image size from themes_info
             ];
         }
     }
