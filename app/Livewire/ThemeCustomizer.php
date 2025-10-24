@@ -257,18 +257,57 @@ class ThemeCustomizer extends Component
      */
     public function updateBoxOrder($orderedIds)
     {
-        // Create a map of boxes by their IDs
+        // Create a map of boxes by their IDs with old positions
         $boxesMap = [];
+        $oldPositionsMap = [];
         foreach ($this->layoutBoxes as $box) {
             $boxesMap[$box['id']] = $box;
+            $oldPositionsMap[$box['id']] = $box['order'];
         }
         
-        // Reorder boxes based on new order
+        // Get the image service for dynamic resizing
+        $imageService = $this->getImageService();
+        
+        // Reorder boxes based on new order and resize images
         $reorderedBoxes = [];
         foreach ($orderedIds as $newIndex => $id) {
             if (isset($boxesMap[$id])) {
                 $box = $boxesMap[$id];
+                $oldPosition = $oldPositionsMap[$id];
+                
+                // Only resize if position actually changed
+                if ($oldPosition !== $newIndex && isset($box['image']) && is_array($box['image'])) {
+                    $mainImagePath = $box['image']['default'] ?? null;
+                    $originalImagePath = $box['image']['original'] ?? null;
+                    
+                    if ($mainImagePath && $originalImagePath) {
+                        try {
+                            // Ensure original copy exists
+                            $this->ensureOriginalCopy($mainImagePath, $imageService);
+                            
+                            // Resize the image to match the new position size
+                            $resizedPath = $imageService->resizeMainImageInPlace($mainImagePath, $originalImagePath, $newIndex, $this->themeName, 'public');
+                            
+                            // Get the size string for the new position
+                            $sizeString = $imageService->getSizeForPosition($newIndex, $this->themeName);
+                            
+                            // Update the box's image data
+                            $box['image'] = [
+                                'original' => $originalImagePath,
+                                'default' => $resizedPath,
+                                'position' => $newIndex,
+                                'size' => $sizeString
+                            ];
+                            
+                        } catch (\Exception $e) {
+                            // Log error but don't break the functionality
+                            \Log::error('Failed to resize image during reorder: ' . $e->getMessage());
+                        }
+                    }
+                }
+                
                 $box['order'] = $newIndex;
+                $box['layout_type'] = $this->detectBoxLayoutType($newIndex);
                 $reorderedBoxes[] = $box;
             }
         }
@@ -278,7 +317,7 @@ class ThemeCustomizer extends Component
         // Update hero slides with new order
         $this->updateHeroSlidesFromLayoutBoxes();
         
-        session()->flash('message', 'تم إعادة ترتيب الصناديق بنجاح');
+        session()->flash('message', 'تم إعادة ترتيب الصناديق وتغيير أحجام الصور بنجاح');
     }
     
     /**
@@ -348,10 +387,13 @@ class ThemeCustomizer extends Component
     }
     
     /**
-     * Move a box to a specific position in the layout
+     * Move a box to a specific position in the layout with dynamic image resizing
      */
     public function moveBoxToPosition($boxId, $newPosition)
     {
+        \Log::info("=== moveBoxToPosition START ===");
+        \Log::info("moveBoxToPosition: boxId={$boxId}, newPosition={$newPosition}, themeName={$this->themeName}");
+        
         // Find the box being moved
         $boxIndex = null;
         foreach ($this->layoutBoxes as $index => $box) {
@@ -362,13 +404,16 @@ class ThemeCustomizer extends Component
         }
         
         if ($boxIndex === null) {
+            \Log::warning("moveBoxToPosition: Box not found with id={$boxId}");
             return;
         }
         
         $oldPosition = $this->layoutBoxes[$boxIndex]['order'];
+        \Log::info("moveBoxToPosition: Found box at index={$boxIndex}, oldPosition={$oldPosition}");
         
         // If box is being moved to same position, do nothing
         if ($oldPosition == $newPosition) {
+            \Log::info("moveBoxToPosition: Same position, no action needed");
             return;
         }
         
@@ -381,9 +426,98 @@ class ThemeCustomizer extends Component
             }
         }
         
+        // Get the image service for dynamic resizing
+        $imageService = $this->getImageService();
+        
         // Swap positions if target position is occupied
         if ($targetBoxIndex !== null) {
+            \Log::info("moveBoxToPosition: TARGET BOX FOUND at index={$targetBoxIndex}, swapping positions");
             $this->layoutBoxes[$targetBoxIndex]['order'] = $oldPosition;
+            
+            // Handle image resizing for the target box (being swapped)
+            $targetBox = $this->layoutBoxes[$targetBoxIndex];
+            if (isset($targetBox['image']) && is_array($targetBox['image'])) {
+                $targetMainImagePath = $targetBox['image']['default'] ?? null;
+                $targetOriginalImagePath = $targetBox['image']['original'] ?? null;
+                
+                \Log::info("moveBoxToPosition: TARGET BOX has image, mainPath={$targetMainImagePath}");
+                
+                if ($targetMainImagePath && $targetOriginalImagePath) {
+                    try {
+                        // Ensure original copy exists
+                        $this->ensureOriginalCopy($targetMainImagePath, $imageService);
+                        
+                        \Log::info("moveBoxToPosition: Resizing TARGET BOX image to position={$oldPosition}");
+                        // Resize the target box's image to match the old position size
+                        $resizedTargetPath = $imageService->resizeMainImageInPlace($targetMainImagePath, $targetOriginalImagePath, $oldPosition, $this->themeName, 'public');
+                        
+                        // Get the size string for the old position
+                        $targetSizeString = $imageService->getSizeForPosition($oldPosition, $this->themeName);
+                        
+                        // Update the target box's image data
+                        $this->layoutBoxes[$targetBoxIndex]['image'] = [
+                            'original' => $targetOriginalImagePath,
+                            'default' => $resizedTargetPath,
+                            'position' => $oldPosition,
+                            'size' => $targetSizeString
+                        ];
+                        
+                        // Update layout type for the target box
+                        $this->layoutBoxes[$targetBoxIndex]['layout_type'] = $this->detectBoxLayoutType($oldPosition);
+                        
+                        \Log::info("moveBoxToPosition: TARGET BOX resized successfully to size={$targetSizeString}");
+                        
+                    } catch (\Exception $e) {
+                        // Log error but don't break the functionality
+                        \Log::error('Failed to resize target box image for position swap: ' . $e->getMessage());
+                    }
+                }
+            } else {
+                \Log::info("moveBoxToPosition: TARGET BOX has no image or image is not an array");
+            }
+        } else {
+            \Log::info("moveBoxToPosition: No target box at position={$newPosition}, no swap needed");
+        }
+        
+        // Handle image resizing for the moved box
+        $movedBox = $this->layoutBoxes[$boxIndex];
+        \Log::info("moveBoxToPosition: Processing MOVED BOX");
+        if (isset($movedBox['image']) && is_array($movedBox['image'])) {
+            // Get the main image path (without _original suffix)
+            $mainImagePath = $movedBox['image']['default'] ?? null;
+            $originalImagePath = $movedBox['image']['original'] ?? null;
+            
+            \Log::info("moveBoxToPosition: MOVED BOX has image, mainPath={$mainImagePath}");
+            
+            if ($mainImagePath && $originalImagePath) {
+                try {
+                    // Ensure original copy exists
+                    $this->ensureOriginalCopy($mainImagePath, $imageService);
+                    
+                    \Log::info("moveBoxToPosition: Resizing MOVED BOX image to position={$newPosition}");
+                    // Resize the main image file in place using the original as source
+                    $resizedMainPath = $imageService->resizeMainImageInPlace($mainImagePath, $originalImagePath, $newPosition, $this->themeName, 'public');
+                    
+                    // Get the size string for the message
+                    $sizeString = $imageService->getSizeForPosition($newPosition, $this->themeName);
+                    
+                    // Update the box's image data
+                    $this->layoutBoxes[$boxIndex]['image'] = [
+                        'original' => $originalImagePath,
+                        'default' => $resizedMainPath, // Same path, but now resized
+                        'position' => $newPosition,
+                        'size' => $sizeString
+                    ];
+                    
+                    \Log::info("moveBoxToPosition: MOVED BOX resized successfully to size={$sizeString}");
+                    
+                } catch (\Exception $e) {
+                    // Log error but don't break the functionality
+                    \Log::error('Failed to resize image for position change: ' . $e->getMessage());
+                }
+            }
+        } else {
+            \Log::info("moveBoxToPosition: MOVED BOX has no image or image is not an array");
         }
         
         // Update the moved box's position
@@ -400,7 +534,43 @@ class ThemeCustomizer extends Component
         // Save to database
         $this->updateHeroSlidesFromLayoutBoxes();
         
-        session()->flash('message', 'تم نقل الصندوق إلى الموضع #' . ($newPosition + 1));
+        // Get size info for the message
+        $sizeString = $imageService->getSizeForPosition($newPosition, $this->themeName);
+        
+        if ($targetBoxIndex !== null) {
+            $oldSizeString = $imageService->getSizeForPosition($oldPosition, $this->themeName);
+            session()->flash('message', 'تم تبديل الصناديق - الصندوق المنقول: الموضع #' . ($newPosition + 1) . ' (حجم: ' . $sizeString . ')، الصندوق المستبدل: الموضع #' . ($oldPosition + 1) . ' (حجم: ' . $oldSizeString . ')');
+        } else {
+            session()->flash('message', 'تم نقل الصندوق إلى الموضع #' . ($newPosition + 1) . ' مع تغيير حجم الصورة إلى ' . $sizeString);
+        }
+        
+        \Log::info("=== moveBoxToPosition END === Moved box to position={$newPosition}");
+    }
+    
+    /**
+     * Ensure original copy exists for dynamic resizing
+     * 
+     * @param string $imagePath The current main image path
+     * @param ResponsiveImageService $imageService
+     * @return string The path to the original copy
+     */
+    private function ensureOriginalCopy($imagePath, $imageService)
+    {
+        // Extract path info
+        $pathInfo = pathinfo($imagePath);
+        $directory = $pathInfo['dirname'];
+        $filename = $pathInfo['filename'];
+        $extension = $pathInfo['extension'];
+        
+        // Check if original copy already exists
+        $originalCopyPath = $directory . '/' . $filename . '_original.' . $extension;
+        
+        if (!Storage::disk('public')->exists($originalCopyPath)) {
+            // Create original copy from the main image
+            $originalCopyPath = $imageService->createOriginalCopy($imagePath, 'public');
+        }
+        
+        return $originalCopyPath;
     }
     
     public function updatedTempSlideImage()
@@ -474,7 +644,7 @@ class ThemeCustomizer extends Component
         // Reset form
         $this->resetNewHeroSlide();
         
-        session()->flash('message', 'تم إضافة الصورة بنجاح مع 5 أحجام مختلفة (صورة مصغرة، صغير، متوسط، كبير، أصلي)');
+        session()->flash('message', 'تم إضافة الصورة بنجاح');
     }
     
     public function editHeroSlide($index)
@@ -537,7 +707,7 @@ class ThemeCustomizer extends Component
         $this->resetNewHeroSlide();
         $this->editingSlideIndex = null;
         
-        session()->flash('message', 'تم تحديث الصورة بنجاح مع 5 أحجام مختلفة (صورة مصغرة، صغير، متوسط، كبير، أصلي)');
+        session()->flash('message', 'تم تحديث الصورة بنجاح');
     }
     
     public function cancelEdit()

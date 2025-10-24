@@ -4,6 +4,51 @@
 @section('description', isset($homePage) ? $homePage->description : '')
 
 @section('content')
+<div dir="rtl" lang="ar">
+
+<style>
+    /* Global RTL Styling for Home Page */
+    [dir="rtl"] .section-header {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .section-header__content {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .section-header h2 {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .sale-banner__item-content {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .blog__content {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .blog__admin {
+        flex-direction: row-reverse;
+    }
+    
+    /* Better spacing for RTL */
+    [dir="rtl"] .me-30 {
+        margin-inline-end: 30px !important;
+    }
+    
+    /* Swiper RTL fixes */
+    [dir="rtl"] .swiper-button-next {
+        left: 10px;
+        right: auto;
+    }
+    
+    [dir="rtl"] .swiper-button-prev {
+        right: 10px;
+        left: auto;
+    }
+</style>
+
 @php
     // Dump theme data passed from controller
     // Map hero slides by their order key for proper positioning
@@ -331,6 +376,18 @@
 </section>
 
 <style>
+    /* RTL Layout Improvements */
+    [dir="rtl"] {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .banner__content-heading,
+    [dir="rtl"] .banner__content-moto,
+    [dir="rtl"] .section-header h2,
+    [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+        text-align: right;
+    }
+    
     /* Limited Offers Section - Image Size Adjustment */
     .product__item--style11 .product__item-thumb {
         flex: 0 0 35%;
@@ -353,6 +410,29 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        text-align: right;
+    }
+    
+    /* RTL Arrow Icons */
+    [dir="rtl"] .trk-btn .fa-arrow-right-long:before {
+        content: "\f177"; /* arrow-left */
+    }
+    
+    [dir="rtl"] .trk-btn .fa-arrow-right:before {
+        content: "\f060"; /* arrow-left */
+    }
+    
+    /* Product Cards RTL */
+    [dir="rtl"] .product__item-content {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .product__item-footer {
+        direction: rtl;
+    }
+    
+    [dir="rtl"] .product__item-rating {
+        direction: rtl;
     }
     
     @media (max-width: 575px) {
@@ -1061,6 +1141,7 @@
             position: relative;
             padding-bottom: 15px;
             margin-bottom: 20px;
+            text-align: center;
         }
         
         .product-listing__column .section-header h2:after {
@@ -1068,6 +1149,7 @@
             position: absolute;
             bottom: 0;
             left: 50%;
+            right: auto;
             transform: translateX(-50%);
             width: 60px;
             height: 3px;
@@ -1128,6 +1210,7 @@
             font-weight: 600;
             margin-bottom: 8px;
             line-height: 1.4;
+            text-align: right;
         }
         
         .product-listing__column .product__item--style3 .product__item-content h5 a {
@@ -1147,6 +1230,7 @@
             font-size: 0.875rem;
             color: #6b7280;
             margin-bottom: 8px;
+            direction: rtl;
         }
         
         .product-listing__column .product__item--style3 .product__item-rating i {
@@ -1169,7 +1253,8 @@
         .product-listing__column .product__item-badge {
             position: absolute;
             top: 10px;
-            left: 10px;
+            right: 10px;
+            left: auto;
             background: #ef4444;
             color: #fff;
             padding: 4px 10px;
@@ -1181,6 +1266,12 @@
         
         .product-listing__column .product__item-badge--new {
             background: #10B981;
+        }
+        
+        /* RTL Badge Position */
+        [dir="rtl"] .product__item-badge {
+            right: 10px;
+            left: auto;
         }
         
         @media (max-width: 991px) {
@@ -1460,42 +1551,43 @@
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3 mb-md-0">
                 <div class="feature-bar__item d-flex align-items-center">
                     <img src="{{ asset('themes/torganic/assets/images/feature/bar/1.png') }}" alt="توصيل سريع">
-                    <div class="feature-bar__text ms-4">
+                    <div class="feature-bar__text me-3">
                         <h3 class="feature-bar__title fs-6 fw-bold mb-0">توصيل سريع</h3>
-                        <p class="feature-bar__description fs-7 mb-0">لطلبات أكثر من 40 ريال</p>
+                        <p class="feature-bar__description fs-7 mb-0 text-muted">لطلبات أكثر من 40 ريال</p>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3 mb-md-0">
                 <div class="feature-bar__item d-flex align-items-center">
                     <img src="{{ asset('themes/torganic/assets/images/feature/bar/2.png') }}" alt="دعم 24/7">
-                    <div class="feature-bar__text ms-4">
+                    <div class="feature-bar__text me-3">
                         <h3 class="feature-bar__title fs-6 fw-bold mb-0">دعم 24/7</h3>
-                        <p class="feature-bar__description fs-7 mb-0">تواصل معنا في أي وقت</p>
+                        <p class="feature-bar__description fs-7 mb-0 text-muted">تواصل معنا في أي وقت</p>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3 mb-md-0">
                 <div class="feature-bar__item d-flex align-items-center">
                     <img src="{{ asset('themes/torganic/assets/images/feature/bar/3.png') }}" alt="دفع آمن">
-                    <div class="feature-bar__text ms-4">
+                    <div class="feature-bar__text me-3">
                         <h3 class="feature-bar__title fs-6 fw-bold mb-0">دفع آمن</h3>
-                        <p class="feature-bar__description fs-7 mb-0">100% دفع آمن ومضمون</p>
+                        <p class="feature-bar__description fs-7 mb-0 text-muted">100% دفع آمن ومضمون</p>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3 mb-md-0">
                 <div class="feature-bar__item d-flex align-items-center">
                     <img src="{{ asset('themes/torganic/assets/images/feature/bar/4.png') }}" alt="استرجاع سهل">
-                    <div class="feature-bar__text ms-4">
+                    <div class="feature-bar__text me-3">
                         <h3 class="feature-bar__title fs-6 fw-bold mb-0">استرجاع سهل</h3>
-                        <p class="feature-bar__description fs-7 mb-0">خلال 30 يوم</p>
+                        <p class="feature-bar__description fs-7 mb-0 text-muted">خلال 30 يوم</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+</div><!-- End RTL wrapper -->
 @endsection
 
 @push('scripts')
@@ -1507,6 +1599,7 @@
             slidesPerView: 2,
             spaceBetween: 20,
             loop: false,
+            rtl: true,
             navigation: {
                 nextEl: '.featured-categories__slider-next',
                 prevEl: '.featured-categories__slider-prev',
@@ -1530,6 +1623,7 @@
         slidesPerView: 2,
         spaceBetween: 20,
         loop: true,
+        rtl: true,
         navigation: {
             nextEl: '.product__slider-next',
             prevEl: '.product__slider-prev',
@@ -1555,6 +1649,7 @@
         slidesPerView: 1,
         spaceBetween: 30,
         loop: true,
+        rtl: true,
         navigation: {
             nextEl: '.blog__slider-next',
             prevEl: '.blog__slider-prev',

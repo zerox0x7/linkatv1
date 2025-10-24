@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ThemesInfo;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -63,15 +64,20 @@ class ResponsiveImageService
         $originalWidth = $image->width();
         $originalHeight = $image->height();
         
-        // First, always save the original
+        // Save only the original image (no multiple sizes)
         $paths['original'] = $this->resizeAndSave(
             $image, 
             $basePath, 
-            $filename . '_original.' . $extension, 
+            $filename . '.' . $extension, 
             null, 
             $disk
         );
         
+        // COMMENTED OUT: Multiple size generation code
+        // This code previously created multiple sizes (thumbnail, small, medium, large)
+        // Now we only upload the original size as requested by the user
+        
+        /*
         // Create each responsive size (always create all sizes)
         foreach ($this->sizes as $sizeName => $maxWidth) {
             // Skip 'original' since we already saved it
@@ -100,9 +106,10 @@ class ResponsiveImageService
                 );
             }
         }
+        */
         
-        // Set the large size as default, or original if large doesn't exist
-        $paths['default'] = $paths['large'] ?? $paths['original'];
+        // Set the original as default since we're only using one size
+        $paths['default'] = $paths['original'];
         
         return $paths;
     }
@@ -267,58 +274,223 @@ class ResponsiveImageService
     }
     
     /**
-     * Convert old single-path format to responsive format
-     * This is useful for migrating existing images
+     * Get the required image size for a specific layout position from themes_info table
      * 
-     * @param string $oldPath The old single image path
-     * @param string $disk The storage disk (default: 'public')
-     * @return array Array containing paths to all generated image sizes
+     * @param int $position The layout position (0-8)
+     * @param string $themeName The theme name (e.g., 'torganic')
+     * @return string The required size string (e.g., "400x300") or fallback size
      */
-    public function convertToResponsive($oldPath, $disk = 'public')
+    public function getSizeForPosition($position, $themeName = 'torganic')
     {
-        if (!Storage::disk($disk)->exists($oldPath)) {
-            return null;
+        // Try to get size from themes_info table
+        // Note: themes_info order is 1-indexed, but position is 0-indexed
+        
+        \Log::info("getSizeForPosition CALLED: position={$position}, themeName={$themeName}, timestamp=" . now());
+        
+        // Use direct query without model caching to ensure fresh data
+        $themeInfoData = \DB::table('themes_info')
+            ->where('name', $themeName)
+            ->first();
+        
+        \Log::info("getSizeForPosition: Query executed, found: " . ($themeInfoData ? 'YES' : 'NO'));
+        
+        if ($themeInfoData) {
+            // Decode the JSON images column
+            $images = json_decode($themeInfoData->images, true);
+            
+            \Log::info("getSizeForPosition: Decoded images array, count=" . count($images ?? []));
+            
+            if ($images && is_array($images)) {
+                // Convert 0-indexed position to 1-indexed order for themes_info lookup
+                $order = $position + 1;
+                
+                \Log::info("getSizeForPosition: Looking for order={$order} in images array");
+                
+                // Find the size for this order
+                foreach ($images as $index => $image) {
+                    if (isset($image['order']) && $image['order'] == $order) {
+                        $sizeString = $image['size'] ?? null;
+                        \Log::info("getSizeForPosition: FOUND at index={$index}, order={$order}, size={$sizeString}");
+                        if ($sizeString) {
+                            return $sizeString;
+                        }
+                    }
+                }
+                
+                \Log::warning("getSizeForPosition: No size found for position={$position}, order={$order} in themes_info. Available orders: " . json_encode(array_column($images, 'order')));
+            }
+        } else {
+            \Log::warning("getSizeForPosition: Theme '{$themeName}' not found in themes_info");
         }
         
-        // Get the file content
-        $content = Storage::disk($disk)->get($oldPath);
+        // Fallback to hardcoded mapping if not found in themes_info table
+        $positionSizeMap = [
+            0 => '1200x800',   // Hero Principal - Large hero banner
+            1 => '480x320',    // Top Right - Small side promo
+            2 => '480x320',    // Bottom Right - Small side promo  
+            3 => '480x320',    // Left Side - Small product highlight
+            4 => '1200x800',   // Center Large - Large promotional banner
+            5 => '480x320',    // Right Side - Small product highlight
+            6 => '768x512',    // Secondary 1 - Medium category banner
+            7 => '768x512',    // Secondary 2 - Medium category banner
+            8 => '1920x1080',  // Full Width - XL campaign banner
+        ];
         
-        // Read the image
-        $image = $this->manager->read($content);
+        $fallbackSize = $positionSizeMap[$position] ?? '768x512';
+        \Log::info("getSizeForPosition: Using fallback size={$fallbackSize} for position={$position}");
+        return $fallbackSize;
+    }
+    
+    /**
+     * Parse size string to width and height
+     * 
+     * @param string $sizeString Size string like "400x300"
+     * @return array Array with 'width' and 'height' keys
+     */
+    public function parseSizeString($sizeString)
+    {
+        if (preg_match('/^(\d+)x(\d+)$/', $sizeString, $matches)) {
+            return [
+                'width' => (int) $matches[1],
+                'height' => (int) $matches[2]
+            ];
+        }
         
-        // Extract path info
-        $pathInfo = pathinfo($oldPath);
+        // Default fallback
+        return [
+            'width' => 768,
+            'height' => 512
+        ];
+    }
+    
+    /**
+     * Resize image to specific size and save with position-specific naming
+     * 
+     * @param string $originalImagePath The path to the original image
+     * @param int $position The layout position
+     * @param string $disk The storage disk (default: 'public')
+     * @return string The path to the resized image
+     */
+    public function resizeImageForPosition($originalImagePath, $position, $disk = 'public')
+    {
+        // Get the required size for this position
+        $requiredSize = $this->getSizeForPosition($position);
+        
+        // Get the max width for this size
+        $maxWidth = $this->sizes[$requiredSize] ?? null;
+        
+        // Check if original image exists
+        if (!Storage::disk($disk)->exists($originalImagePath)) {
+            throw new \Exception("Original image not found: {$originalImagePath}");
+        }
+        
+        // Read the original image
+        $imageContent = Storage::disk($disk)->get($originalImagePath);
+        $image = $this->manager->read($imageContent);
+        
+        // Extract path info for naming
+        $pathInfo = pathinfo($originalImagePath);
         $directory = $pathInfo['dirname'];
-        $filename = pathInfo['filename'];
+        $filename = $pathInfo['filename'];
         $extension = $pathInfo['extension'];
         
-        $paths = [];
-        $originalWidth = $image->width();
+        // Create new filename with position and size info
+        $newFilename = $filename . '_pos' . $position . '_' . $requiredSize . '.' . $extension;
+        $newPath = $directory . '/' . $newFilename;
         
-        // Create each responsive size
-        foreach ($this->sizes as $sizeName => $maxWidth) {
-            if ($originalWidth > $maxWidth) {
-                $paths[$sizeName] = $this->resizeAndSave(
-                    $image, 
-                    $directory, 
-                    $filename . '_' . $sizeName . '.' . $extension, 
-                    $maxWidth, 
-                    $disk
-                );
-            }
+        // Resize and save the image
+        $resizedImage = clone $image;
+        if ($maxWidth !== null) {
+            $resizedImage->scale(width: $maxWidth);
         }
         
-        if (empty($paths)) {
-            // Image is already small, just reference it as all sizes
-            foreach (array_keys($this->sizes) as $sizeName) {
-                $paths[$sizeName] = $oldPath;
-            }
+        // Encode and save
+        $encoded = $resizedImage->encode();
+        Storage::disk($disk)->put($newPath, (string) $encoded);
+        
+        return $newPath;
+    }
+    
+    /**
+     * Create a copy of original image with _original suffix for source reference
+     * 
+     * @param string $imagePath The current image path
+     * @param string $disk The storage disk (default: 'public')
+     * @return string The path to the original copy
+     */
+    public function createOriginalCopy($imagePath, $disk = 'public')
+    {
+        // Check if image exists
+        if (!Storage::disk($disk)->exists($imagePath)) {
+            throw new \Exception("Image not found: {$imagePath}");
         }
         
-        $paths['original'] = $oldPath;
-        $paths['default'] = end($paths);
+        // Extract path info
+        $pathInfo = pathinfo($imagePath);
+        $directory = $pathInfo['dirname'];
+        $filename = $pathInfo['filename'];
+        $extension = $pathInfo['extension'];
         
-        return $paths;
+        // Create original copy filename
+        $originalFilename = $filename . '_original.' . $extension;
+        $originalPath = $directory . '/' . $originalFilename;
+        
+        // Copy the file
+        $imageContent = Storage::disk($disk)->get($imagePath);
+        Storage::disk($disk)->put($originalPath, $imageContent);
+        
+        return $originalPath;
+    }
+    
+    /**
+     * Resize the main image file in place based on position requirements from themes_info table
+     * 
+     * @param string $mainImagePath The main image path (e.g., 1761319824_68fb9b903bb86.png)
+     * @param string $originalImagePath The original source image path (e.g., 1761319824_68fb9b903bb86_original.png)
+     * @param int $position The layout position
+     * @param string $themeName The theme name (e.g., 'torganic')
+     * @param string $disk The storage disk (default: 'public')
+     * @return string The path to the resized main image (same as input)
+     */
+    public function resizeMainImageInPlace($mainImagePath, $originalImagePath, $position, $themeName = 'torganic', $disk = 'public')
+    {
+        \Log::info("resizeMainImageInPlace START: position={$position}, theme={$themeName}, mainPath={$mainImagePath}");
+        
+        // Get the required size string for this position from themes_info table
+        $sizeString = $this->getSizeForPosition($position, $themeName);
+        
+        // Parse the size string to get width and height
+        $dimensions = $this->parseSizeString($sizeString);
+        $targetWidth = $dimensions['width'];
+        $targetHeight = $dimensions['height'];
+        
+        \Log::info("resizeMainImageInPlace: targetSize={$sizeString}, width={$targetWidth}, height={$targetHeight}");
+        
+        // Check if original image exists
+        if (!Storage::disk($disk)->exists($originalImagePath)) {
+            \Log::error("resizeMainImageInPlace: Original image not found: {$originalImagePath}");
+            throw new \Exception("Original image not found: {$originalImagePath}");
+        }
+        
+        // Read the original image (source)
+        $imageContent = Storage::disk($disk)->get($originalImagePath);
+        $image = $this->manager->read($imageContent);
+        
+        \Log::info("resizeMainImageInPlace: Original image loaded, dimensions: " . $image->width() . "x" . $image->height());
+        
+        // Resize the image to exact dimensions
+        $resizedImage = clone $image;
+        $resizedImage->resize($targetWidth, $targetHeight);
+        
+        // Encode the resized image
+        $encoded = $resizedImage->encode();
+        
+        // Overwrite the main image file with the resized version
+        Storage::disk($disk)->put($mainImagePath, (string) $encoded);
+        
+        \Log::info("resizeMainImageInPlace SUCCESS: Resized to {$targetWidth}x{$targetHeight} and saved to {$mainImagePath}");
+        
+        return $mainImagePath;
     }
 }
 
