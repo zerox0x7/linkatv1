@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\ThemeData;
 use App\Models\Setting;
+use App\Services\ResponsiveImageService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
@@ -54,6 +55,14 @@ class ThemeCustomizer extends Component
     // Sections Activation (10 sections)
     public $sectionsData = [];
     
+    /**
+     * Get image service instance
+     */
+    protected function getImageService()
+    {
+        return new ResponsiveImageService();
+    }
+    
     public function mount()
     {
         $storeId = auth()->user()->store_id ?? null;
@@ -83,7 +92,14 @@ class ThemeCustomizer extends Component
         // Add image preview URLs for existing slides
         foreach ($this->heroSlides as $index => $slide) {
             if (isset($slide['image'])) {
-                $this->heroSlides[$index]['image_preview'] = Storage::url($slide['image']);
+                // Check if it's an array (responsive images) or string (old format)
+                if (is_array($slide['image'])) {
+                    $imageService = $this->getImageService();
+                    $bestSize = $imageService->getBestSize($slide['image'], 'hero');
+                    $this->heroSlides[$index]['image_preview'] = Storage::url($bestSize);
+                } else {
+                    $this->heroSlides[$index]['image_preview'] = Storage::url($slide['image']);
+                }
             }
         }
         
@@ -429,8 +445,16 @@ class ThemeCustomizer extends Component
             'tempSlideImage.max' => 'حجم الصورة يجب أن لا يتجاوز 2MB',
         ]);
         
-        // Upload image
-        $path = $this->tempSlideImage->store('themes/' . $this->themeName . '/hero', 'public');
+        // Upload image and create responsive versions (small, medium, large, xl)
+        $imageService = $this->getImageService();
+        $imagePaths = $imageService->uploadAndResize(
+            $this->tempSlideImage,
+            'themes/' . $this->themeName . '/hero',
+            'public'
+        );
+        
+        // Get preview URL (use large size for preview)
+        $previewPath = $imageService->getBestSize($imagePaths, 'hero');
         
         // Add new slide
         $this->heroSlides[] = [
@@ -439,8 +463,8 @@ class ThemeCustomizer extends Component
             'subtitle' => $this->newHeroSlide['subtitle'],
             'button_text' => $this->newHeroSlide['button_text'],
             'button_link' => $this->newHeroSlide['button_link'],
-            'image' => $path,
-            'image_preview' => Storage::url($path),
+            'image' => $imagePaths, // Store array of all sizes
+            'image_preview' => Storage::url($previewPath),
             'order' => count($this->heroSlides),
         ];
         
@@ -450,7 +474,7 @@ class ThemeCustomizer extends Component
         // Reset form
         $this->resetNewHeroSlide();
         
-        session()->flash('message', 'تم إضافة الصورة بنجاح');
+        session()->flash('message', 'تم إضافة الصورة بنجاح مع 5 أحجام مختلفة (صورة مصغرة، صغير، متوسط، كبير، أصلي)');
     }
     
     public function editHeroSlide($index)
@@ -484,14 +508,26 @@ class ThemeCustomizer extends Component
         
         // Update image if new one uploaded
         if ($this->tempSlideImage) {
-            // Delete old image
+            $imageService = $this->getImageService();
+            
+            // Delete old image(s)
             if (isset($this->heroSlides[$this->editingSlideIndex]['image'])) {
-                Storage::disk('public')->delete($this->heroSlides[$this->editingSlideIndex]['image']);
+                $oldImage = $this->heroSlides[$this->editingSlideIndex]['image'];
+                $imageService->deleteResponsiveImages($oldImage, 'public');
             }
             
-            $path = $this->tempSlideImage->store('themes/' . $this->themeName . '/hero', 'public');
-            $this->heroSlides[$this->editingSlideIndex]['image'] = $path;
-            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = Storage::url($path);
+            // Upload new image with responsive sizes
+            $imagePaths = $imageService->uploadAndResize(
+                $this->tempSlideImage,
+                'themes/' . $this->themeName . '/hero',
+                'public'
+            );
+            
+            // Get preview URL
+            $previewPath = $imageService->getBestSize($imagePaths, 'hero');
+            
+            $this->heroSlides[$this->editingSlideIndex]['image'] = $imagePaths;
+            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = Storage::url($previewPath);
         }
         
         // Save
@@ -501,7 +537,7 @@ class ThemeCustomizer extends Component
         $this->resetNewHeroSlide();
         $this->editingSlideIndex = null;
         
-        session()->flash('message', 'تم تحديث الصورة بنجاح');
+        session()->flash('message', 'تم تحديث الصورة بنجاح مع 5 أحجام مختلفة (صورة مصغرة، صغير، متوسط، كبير، أصلي)');
     }
     
     public function cancelEdit()
@@ -513,9 +549,10 @@ class ThemeCustomizer extends Component
     public function deleteHeroSlide($index)
     {
         if (isset($this->heroSlides[$index])) {
-            // Delete image from storage
+            // Delete image(s) from storage
             if (isset($this->heroSlides[$index]['image'])) {
-                Storage::disk('public')->delete($this->heroSlides[$index]['image']);
+                $imageService = $this->getImageService();
+                $imageService->deleteResponsiveImages($this->heroSlides[$index]['image'], 'public');
             }
             
             // Remove slide
@@ -525,7 +562,7 @@ class ThemeCustomizer extends Component
             // Save
             $this->saveHeroSlides();
             
-            session()->flash('message', 'تم حذف الصورة بنجاح');
+            session()->flash('message', 'تم حذف الصورة وجميع الأحجام بنجاح');
         }
     }
     
@@ -626,13 +663,21 @@ class ThemeCustomizer extends Component
         
         // Handle banner image upload
         if ($this->bannerImage) {
+            $imageService = $this->getImageService();
+            
             // Delete old image if exists
             if (isset($bannerData['main_image'])) {
-                Storage::disk('public')->delete($bannerData['main_image']);
+                $imageService->deleteResponsiveImages($bannerData['main_image'], 'public');
             }
             
-            $path = $this->bannerImage->store('themes/' . $this->themeName . '/banner', 'public');
-            $bannerData['main_image'] = $path;
+            // Upload with responsive sizes
+            $imagePaths = $imageService->uploadAndResize(
+                $this->bannerImage,
+                'themes/' . $this->themeName . '/banner',
+                'public'
+            );
+            
+            $bannerData['main_image'] = $imagePaths;
         }
         
         $this->themeData->banner_data = $bannerData;
@@ -679,13 +724,14 @@ class ThemeCustomizer extends Component
         $bannerData = $this->themeData->banner_data ?? [];
         
         if (isset($bannerData['main_image'])) {
-            Storage::disk('public')->delete($bannerData['main_image']);
+            $imageService = $this->getImageService();
+            $imageService->deleteResponsiveImages($bannerData['main_image'], 'public');
             unset($bannerData['main_image']);
             $this->themeData->banner_data = $bannerData;
             $this->themeData->save();
             
             $this->bannerImagePreview = null;
-            session()->flash('message', 'تم حذف صورة البانر بنجاح');
+            session()->flash('message', 'تم حذف صورة البانر وجميع الأحجام بنجاح');
         }
     }
     

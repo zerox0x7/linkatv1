@@ -801,6 +801,7 @@ class ComposerStaticInit2562d6cea8620041748ee9c2fc48283d
         'App\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/app/Providers/EventServiceProvider.php',
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
         'App\\Providers\\ThemeServiceProvider' => __DIR__ . '/../..' . '/app/Providers/ThemeServiceProvider.php',
+        'App\\Services\\ResponsiveImageService' => __DIR__ . '/../..' . '/app/Services/ResponsiveImageService.php',
         'App\\Services\\ThemeManager' => __DIR__ . '/../..' . '/app/Services/ThemeManager.php',
         'App\\Services\\WhatsApp\\WhatsAppService' => __DIR__ . '/../..' . '/app/Services/WhatsApp/WhatsAppService.php',
         'App\\Traits\\HasProductsPageSettings' => __DIR__ . '/../..' . '/app/Traits/HasProductsPageSettings.php',

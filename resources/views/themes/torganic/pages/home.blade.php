@@ -66,7 +66,12 @@
                         // Get background image from themeData or fallback to homePage
                         $backgroundImage = null;
                         if ($heroSlide && isset($heroSlide['image'])) {
-                            $backgroundImage = asset('storage/' . $heroSlide['image']);
+                            $imageData = $heroSlide['image'];
+                            // Handle both array (responsive images) and string (old format)
+                            $imagePath = is_array($imageData) 
+                                ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                : $imageData;
+                            $backgroundImage = asset('storage/' . $imagePath);
                         } elseif (isset($homePage)) {
                             $backgroundImage = $homePage->hero_image 
                                 ? asset('storage/' . $homePage->hero_image) 
@@ -109,12 +114,19 @@
                     <div class="row g-4">
                         <div class="col-md-6 col-xl-12">
                             <div class="sale-banner__item sale-banner__item--home2">
-                                @php
-                                    // Get background image for slide 2
-                                    $slide2Background = $heroSlide2 && isset($heroSlide2['image']) 
-                                        ? asset('storage/' . $heroSlide2['image']) 
-                                        : asset('themes/torganic/assets/images/banner/home2/2.png');
-                                @endphp
+                        @php
+                            // Get background image for slide 2
+                            if ($heroSlide2 && isset($heroSlide2['image'])) {
+                                $imageData = $heroSlide2['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide2Background = asset('storage/' . $imagePath);
+                            } else {
+                                $slide2Background = asset('themes/torganic/assets/images/banner/home2/2.png');
+                            }
+                        @endphp
                                 <div class="sale-banner__item-inner" style="background-image: url({{ $slide2Background }});">
                                     <div class="sale-banner__item-content">
                                         <span class="sale-banner__offer">
@@ -132,12 +144,19 @@
                         </div>
                         <div class="col-md-6 col-xl-12">
                             <div class="sale-banner__item sale-banner__item--home2">
-                                @php
-                                    // Get background image for slide 3
-                                    $slide3Background = $heroSlide3 && isset($heroSlide3['image']) 
-                                        ? asset('storage/' . $heroSlide3['image']) 
-                                        : asset('themes/torganic/assets/images/banner/home2/3.png');
-                                @endphp
+                        @php
+                            // Get background image for slide 3
+                            if ($heroSlide3 && isset($heroSlide3['image'])) {
+                                $imageData = $heroSlide3['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide3Background = asset('storage/' . $imagePath);
+                            } else {
+                                $slide3Background = asset('themes/torganic/assets/images/banner/home2/3.png');
+                            }
+                        @endphp
                                 <div class="sale-banner__item-inner" style="background-image: url({{ $slide3Background }});">
                                     <div class="sale-banner__item-content">
                                         <span class="sale-banner__offer">
@@ -357,9 +376,16 @@
                     <div class="sale-banner__item sale-banner__item--style5">
                         @php
                             // Get image for slide 4
-                            $slide4Image = $heroSlide4 && isset($heroSlide4['image']) 
-                                ? asset('storage/' . $heroSlide4['image']) 
-                                : asset('themes/torganic/assets/images/product/sale-banner/5.png');
+                            if ($heroSlide4 && isset($heroSlide4['image'])) {
+                                $imageData = $heroSlide4['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide4Image = asset('storage/' . $imagePath);
+                            } else {
+                                $slide4Image = asset('themes/torganic/assets/images/product/sale-banner/5.png');
+                            }
                         @endphp
                         <div class="sale-banner__item-inner">
                             <div class="sale-banner__item-content">
@@ -380,9 +406,16 @@
                     <div class="sale-banner__item sale-banner__item--style4">
                         @php
                             // Get image for slide 5
-                            $slide5Image = $heroSlide5 && isset($heroSlide5['image']) 
-                                ? asset('storage/' . $heroSlide5['image']) 
-                                : asset('themes/torganic/assets/images/product/sale-banner/4.png');
+                            if ($heroSlide5 && isset($heroSlide5['image'])) {
+                                $imageData = $heroSlide5['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide5Image = asset('storage/' . $imagePath);
+                            } else {
+                                $slide5Image = asset('themes/torganic/assets/images/product/sale-banner/4.png');
+                            }
                         @endphp
                         <div class="sale-banner__item-inner">
                             <div class="sale-banner__item-thumb">
@@ -406,9 +439,16 @@
                     <div class="sale-banner__item sale-banner__item--style52">
                         @php
                             // Get image for slide 6
-                            $slide6Image = $heroSlide6 && isset($heroSlide6['image']) 
-                                ? asset('storage/' . $heroSlide6['image']) 
-                                : asset('themes/torganic/assets/images/product/sale-banner/6.png');
+                            if ($heroSlide6 && isset($heroSlide6['image'])) {
+                                $imageData = $heroSlide6['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide6Image = asset('storage/' . $imagePath);
+                            } else {
+                                $slide6Image = asset('themes/torganic/assets/images/product/sale-banner/6.png');
+                            }
                         @endphp
                         <div class="sale-banner__item-inner">
                             <div class="sale-banner__item-content">
@@ -755,9 +795,16 @@
                         <div class="sale-banner__item-inner">
                             <div class="sale-banner__item-thumb">
                                 @php
-                                    $slide7Image = $heroSlide7 && isset($heroSlide7['image']) 
-                                        ? asset('storage/' . $heroSlide7['image']) 
-                                        : asset('themes/torganic/assets/images/product/sale-banner/2.png');
+                                    if ($heroSlide7 && isset($heroSlide7['image'])) {
+                                        $imageData = $heroSlide7['image'];
+                                        // Handle both array (responsive images) and string (old format)
+                                        $imagePath = is_array($imageData) 
+                                            ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                            : $imageData;
+                                        $slide7Image = asset('storage/' . $imagePath);
+                                    } else {
+                                        $slide7Image = asset('themes/torganic/assets/images/product/sale-banner/2.png');
+                                    }
                                 @endphp
                                 <img src="{{ $slide7Image }}" alt="{{ $heroSlide7['title'] ?? 'منتجات بحرية' }}">
                             </div>
@@ -777,9 +824,16 @@
                         <div class="sale-banner__item-inner">
                             <div class="sale-banner__item-thumb">
                                 @php
-                                    $slide8Image = $heroSlide8 && isset($heroSlide8['image']) 
-                                        ? asset('storage/' . $heroSlide8['image']) 
-                                        : asset('themes/torganic/assets/images/product/sale-banner/3.png');
+                                    if ($heroSlide8 && isset($heroSlide8['image'])) {
+                                        $imageData = $heroSlide8['image'];
+                                        // Handle both array (responsive images) and string (old format)
+                                        $imagePath = is_array($imageData) 
+                                            ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                            : $imageData;
+                                        $slide8Image = asset('storage/' . $imagePath);
+                                    } else {
+                                        $slide8Image = asset('themes/torganic/assets/images/product/sale-banner/3.png');
+                                    }
                                 @endphp
                                 <img src="{{ $slide8Image }}" alt="{{ $heroSlide8['title'] ?? 'فواكه طازجة' }}">
                                 <div class="sale-banner__item-discount-badge sale-banner__item-discount-badge--style2">
@@ -1158,9 +1212,16 @@
                 <div class="sale-banner__item-inner">
                     <div class="sale-banner__item-thumb">
                         @php
-                            $slide9Image = $heroSlide9 && isset($heroSlide9['image']) 
-                                ? asset('storage/' . $heroSlide9['image']) 
-                                : asset('themes/torganic/assets/images/product/sale-banner/1.png');
+                            if ($heroSlide9 && isset($heroSlide9['image'])) {
+                                $imageData = $heroSlide9['image'];
+                                // Handle both array (responsive images) and string (old format)
+                                $imagePath = is_array($imageData) 
+                                    ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
+                                    : $imageData;
+                                $slide9Image = asset('storage/' . $imagePath);
+                            } else {
+                                $slide9Image = asset('themes/torganic/assets/images/product/sale-banner/1.png');
+                            }
                         @endphp
                         <img class="sale-banner__image" src="{{ $slide9Image }}" alt="{{ $heroSlide9['title'] ?? 'خضروات طازجة' }}">
                         <div class="sale-banner__item-discount-badge">

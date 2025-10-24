@@ -198,6 +198,7 @@ return array(
     'App\\Providers\\EventServiceProvider' => $baseDir . '/app/Providers/EventServiceProvider.php',
     'App\\Providers\\RouteServiceProvider' => $baseDir . '/app/Providers/RouteServiceProvider.php',
     'App\\Providers\\ThemeServiceProvider' => $baseDir . '/app/Providers/ThemeServiceProvider.php',
+    'App\\Services\\ResponsiveImageService' => $baseDir . '/app/Services/ResponsiveImageService.php',
     'App\\Services\\ThemeManager' => $baseDir . '/app/Services/ThemeManager.php',
     'App\\Services\\WhatsApp\\WhatsAppService' => $baseDir . '/app/Services/WhatsApp/WhatsAppService.php',
     'App\\Traits\\HasProductsPageSettings' => $baseDir . '/app/Traits/HasProductsPageSettings.php',

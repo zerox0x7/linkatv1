@@ -1,0 +1,1 @@
+do not migrate the database using migration command , if you want to migrate always use path of the file and migrate one file each time 

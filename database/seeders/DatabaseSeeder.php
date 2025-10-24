@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             HomeSectionSeeder::class,
             HeaderSettingsSeeder::class,
             SubscriptionPlanSeeder::class,
+            ThemesInfoSeeder::class,
         ]);
     }
 }

@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('home_sections', function (Blueprint $table) {
-            // إضافة عمود store_id مع foreign key constraint
-            $table->unsignedBigInteger('store_id')->default(1)->after('id');
-            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            // إضافة عمود store_id بدون foreign key constraint (stores table doesn't exist)
+            if (!Schema::hasColumn('home_sections', 'store_id')) {
+                $table->unsignedBigInteger('store_id')->default(1)->after('id');
+            }
             
             // إضافة index للأداء
             $table->index(['store_id', 'is_active']);
@@ -32,9 +33,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('home_sections', function (Blueprint $table) {
-            // حذف foreign key constraint أولاً
-            $table->dropForeign(['store_id']);
-            
             // حذف index
             $table->dropIndex(['store_id', 'is_active']);
             

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ThemeData;
 use App\Models\Setting;
+use App\Services\ResponsiveImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -12,6 +13,13 @@ use Illuminate\Support\Facades\Validator;
 
 class ThemeController extends Controller
 {
+    protected $imageService;
+    
+    public function __construct()
+    {
+        $this->imageService = new ResponsiveImageService();
+    }
+    
     /**
      * Display theme customization page
      *
@@ -139,11 +147,17 @@ class ThemeController extends Controller
             
             // Delete old image if exists
             if (isset($heroData['main_image'])) {
-                Storage::disk('public')->delete($heroData['main_image']);
+                $this->imageService->deleteResponsiveImages($heroData['main_image'], 'public');
             }
             
-            $path = $request->file('hero_image')->store('themes/' . $themeName . '/hero', 'public');
-            $heroData['main_image'] = $path;
+            // Upload with responsive sizes
+            $imagePaths = $this->imageService->uploadAndResize(
+                $request->file('hero_image'),
+                'themes/' . $themeName . '/hero',
+                'public'
+            );
+            
+            $heroData['main_image'] = $imagePaths;
             $themeData->hero_data = $heroData;
         }
 
@@ -153,11 +167,17 @@ class ThemeController extends Controller
             
             // Delete old image if exists
             if (isset($bannerData['main_image'])) {
-                Storage::disk('public')->delete($bannerData['main_image']);
+                $this->imageService->deleteResponsiveImages($bannerData['main_image'], 'public');
             }
             
-            $path = $request->file('banner_image')->store('themes/' . $themeName . '/banner', 'public');
-            $bannerData['main_image'] = $path;
+            // Upload with responsive sizes
+            $imagePaths = $this->imageService->uploadAndResize(
+                $request->file('banner_image'),
+                'themes/' . $themeName . '/banner',
+                'public'
+            );
+            
+            $bannerData['main_image'] = $imagePaths;
             $themeData->banner_data = $bannerData;
         }
 
@@ -168,11 +188,17 @@ class ThemeController extends Controller
             foreach ($request->file('extra_images') as $key => $file) {
                 // Delete old image if exists
                 if (isset($extraImages[$key])) {
-                    Storage::disk('public')->delete($extraImages[$key]);
+                    $this->imageService->deleteResponsiveImages($extraImages[$key], 'public');
                 }
                 
-                $path = $file->store('themes/' . $themeName . '/extra', 'public');
-                $extraImages[$key] = $path;
+                // Upload with responsive sizes
+                $imagePaths = $this->imageService->uploadAndResize(
+                    $file,
+                    'themes/' . $themeName . '/extra',
+                    'public'
+                );
+                
+                $extraImages[$key] = $imagePaths;
             }
             
             $themeData->extra_images = $extraImages;
@@ -270,7 +296,7 @@ class ThemeController extends Controller
             case 'hero':
                 $heroData = $themeData->hero_data ?? [];
                 if (isset($heroData[$imageKey])) {
-                    Storage::disk('public')->delete($heroData[$imageKey]);
+                    $this->imageService->deleteResponsiveImages($heroData[$imageKey], 'public');
                     unset($heroData[$imageKey]);
                     $themeData->hero_data = $heroData;
                 }
@@ -279,7 +305,7 @@ class ThemeController extends Controller
             case 'banner':
                 $bannerData = $themeData->banner_data ?? [];
                 if (isset($bannerData[$imageKey])) {
-                    Storage::disk('public')->delete($bannerData[$imageKey]);
+                    $this->imageService->deleteResponsiveImages($bannerData[$imageKey], 'public');
                     unset($bannerData[$imageKey]);
                     $themeData->banner_data = $bannerData;
                 }
@@ -288,7 +314,7 @@ class ThemeController extends Controller
             case 'extra':
                 $extraImages = $themeData->extra_images ?? [];
                 if (isset($extraImages[$imageKey])) {
-                    Storage::disk('public')->delete($extraImages[$imageKey]);
+                    $this->imageService->deleteResponsiveImages($extraImages[$imageKey], 'public');
                     unset($extraImages[$imageKey]);
                     $themeData->extra_images = $extraImages;
                 }
