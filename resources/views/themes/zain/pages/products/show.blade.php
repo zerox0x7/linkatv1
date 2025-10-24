@@ -1,0 +1,925 @@
+@extends('theme::layouts.app')
+
+@section('title', $product->meta_title ?? $product->name . ' - ' . \App\Models\Setting::get('store_name', $product->name))
+@section('meta_description', $product->meta_description ?? strip_tags(Str::limit($product->description, 160)))
+@section('meta_keywords', $product->meta_keywords ?? implode(', ', array_merge([$product->focus_keyword ?? $product->name, $product->category ? $product->category->name : 'منتج'], !empty($productTags) ? $productTags : [])))
+@section('meta_robots', 'index, follow')
+@section('og_type', 'product')
+@section('og_title', ($product->meta_title ?? $product->name) . ' - ' . \App\Models\Setting::get('store_name', config('app.name')))
+@section('og_description', $product->meta_description ?? strip_tags(Str::limit($product->description, 160)))
+@section('og_image', $product->image_url ? asset($product->image_url) : asset('images/default-product.png'))
+@section('twitter_image', $product->image_url ? asset($product->image_url) : asset('images/default-product.png'))
+@section('canonical_url', route('products.show', $product->slug))
+
+@php
+    $storeName = \App\Models\Setting::get('store_name');
+    $gallery = $product->gallery;
+    if (is_string($gallery)) {
+        $gallery = json_decode($gallery, true) ?: [];
+    }
+    if (!is_array($gallery)) {
+        $gallery = [];
+    }
+    $mainImage = Str::startsWith($product->image_url, ['http://', 'https://', '//']) ? $product->image_url : asset($product->image_url);
+    $galleryImages = array_map(fn($img) => asset('storage/' . $img), $gallery);
+    $allImages = array_merge([$mainImage], $galleryImages);
+@endphp
+
+@section('head_scripts')
+<!-- Schema.org Markup for Google -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ $product->name }}",
+  "image": "{{ $product->image_url ? asset($product->image_url) : asset('images/default-product.png') }}",
+  "description": "{{ $product->meta_description ?? strip_tags(Str::limit($product->description, 160)) }}",
+  "sku": "{{ $product->sku ?? $product->id }}",
+  "mpn": "{{ $product->sku ?? $product->id }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ $storeName }}"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ route('products.show', $product->slug) }}",
+    "priceCurrency": "SAR",
+    "price": "{{ $product->discount_price ?? $product->price }}",
+    "priceValidUntil": "{{ now()->addMonths(1)->format('Y-m-d') }}",
+    "availability": "{{ $product->status == 'out-of-stock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock' }}"
+  }
+  @if(isset($product->rating) && $product->rating > 0)
+  ,"aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ number_format($product->rating, 1) }}",
+    "reviewCount": "{{ $product->reviews_count ?? ($product->sales_count > 0 ? $product->sales_count : 1) }}"
+  }
+  @endif
+  @if(!empty($productTags))
+  ,"keywords": "{{ implode(', ', $productTags) }}"
+  @elseif($product->meta_keywords)
+  ,"keywords": "{{ $product->meta_keywords }}"
+  @endif
+}
+</script>
+@endsection
+
+@section('content')
+<style>
+.shake-animation {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+#tags-list.expanded {
+    max-height: 1000px !important;
+}
+
+.description-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(.4,0,.2,1);
+    max-height: 12em;
+}
+.description-clamp.expanded {
+    -webkit-line-clamp: unset;
+    max-height: 2000px;
+    overflow: visible;
+}
+</style>
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumbs -->
+    <div class="flex items-center text-sm text-gray-400 mb-6">
+        <a href="{{ route('home') }}" class="hover:text-primary">الرئيسية</a>
+        <i class="ri-arrow-left-s-line mx-2"></i>
+        <a href="{{ route('products.index') }}" class="hover:text-primary">المنتجات</a>
+        @if($product->category)
+        <i class="ri-arrow-left-s-line mx-2"></i>
+        <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="hover:text-primary">{{ $product->category->name }}</a>
+        @endif
+        <i class="ri-arrow-left-s-line mx-2"></i>
+        <span class="text-gray-300">{{ $product->name }}</span>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8">
+        <!-- Product Image and Gallery -->
+        <div class="w-full md:w-2/5">
+            <div class="glass-effect rounded-lg overflow-hidden relative">
+                <!-- Main Image as background with navigation arrows -->
+                <div class="h-[400px] bg-center bg-cover flex items-center justify-center relative" style="background-image: url('{{ $mainImage }}')" aria-label="{{ $product->name }}" role="img" title="{{ $product->name }} - {{ $product->category ? $product->category->name : '' }}">
+                    @if(count($allImages) > 1)
+                    <button id="gallery-prev" type="button" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
+                        <i class="ri-arrow-left-s-line text-2xl"></i>
+                    </button>
+                    <button id="gallery-next" type="button" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
+                        <i class="ri-arrow-right-s-line text-2xl"></i>
+                    </button>
+                    @endif
+                </div>
+                <!-- Product Badges -->
+                @if($product->is_featured)
+                <div class="product-card-badge badge-featured absolute top-4 right-4">
+                    مميز
+                </div>
+                @elseif($product->created_at > now()->subDays(7))
+                <div class="product-card-badge badge-new absolute top-4 right-4">
+                    جديد
+                </div>
+                @elseif($product->discount_percentage > 0)
+                <div class="product-card-badge badge-sale absolute top-4 right-4">
+                    خصم {{ $product->discount_percentage }}%
+                </div>
+                @endif
+            </div>
+            <!-- Gallery thumbnails for additional images only (no main image) -->
+            @if(!empty($galleryImages))
+            <div class="flex justify-center mt-4 gap-2 p-4 glass-effect rounded-lg">
+                @foreach($galleryImages as $key => $image)
+                <div class="w-16 h-16 rounded-md overflow-hidden cursor-pointer border-2 border-gray-600 hover:border-primary transition-all gallery-thumbnail" data-index="{{ $key + 1 }}">
+                    <img src="{{ $image }}" alt="{{ $product->name }} - {{ $key + 1 }}" class="w-full h-full object-cover">
+                </div>
+                @endforeach
+            </div>
+            @endif
+            
+            <!-- Tags section -->
+            @php
+                $productTags = [];
+                if (!empty($product->tags)) {
+                    if (is_string($product->tags)) {
+                        $productTags = json_decode($product->tags, true) ?: [];
+                    } else if (is_array($product->tags)) {
+                        $productTags = $product->tags;
+                    }
+                }
+            @endphp
+            
+            @if(!empty($productTags))
+            <div class="glass-effect rounded-lg overflow-hidden mt-4 p-4">
+                <h3 class="text-white text-sm mb-3 font-medium flex items-center">
+                    <i class="ri-price-tag-3-line ml-1"></i> الوسوم
+                </h3>
+                <div id="tags-list" class="flex flex-wrap gap-2 max-h-[4rem] overflow-hidden transition-all duration-300">
+                    @foreach($productTags as $tag)
+                        <a href="{{ route('products.tag', ['product' => $product->id, 'tag' => str_replace(' ', '-', $tag)]) }}"
+                           class="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full text-sm hover:shadow-glow transition-all">
+                            {{ $tag }}
+                        </a>
+                    @endforeach
+                </div>
+                @if(count($productTags) > 0)
+                <div class="text-center mt-2">
+                    <button id="show-more-tags"
+                        class="bg-[#1e1e1e] text-white px-3 py-1 rounded-full text-sm hover:bg-[#2a2a2a] transition-all mx-auto flex items-center justify-center">
+                        المزيد <i class="ri-arrow-down-s-line mr-1"></i>
+                    </button>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            @php
+                $shareUrl = urlencode(route('products.show', $product->slug));
+                $shareText = urlencode($product->name . ' - ' . \App\Models\Setting::get('store_name', $product->name));
+            @endphp
+
+            <div class="flex justify-center gap-2 mt-3">
+                <a href="https://wa.me/?text={{ $shareText }}%20{{ $shareUrl }}" target="_blank" rel="noopener" title="مشاركة على واتساب"
+                   class="bg-green-500 hover:bg-green-600 text-white w-9 h-9 flex items-center justify-center rounded-full transition">
+                    <i class="ri-whatsapp-line text-lg"></i>
+                </a>
+                <a href="https://twitter.com/intent/tweet?text={{ $shareText }}%20{{ $shareUrl }}" target="_blank" rel="noopener" title="مشاركة على تويتر"
+                   class="bg-blue-500 hover:bg-blue-600 text-white w-9 h-9 flex items-center justify-center rounded-full transition">
+                    <i class="ri-twitter-line text-lg"></i>
+                </a>
+                <a href="https://t.me/share/url?url={{ $shareUrl }}&text={{ $shareText }}" target="_blank" rel="noopener" title="مشاركة على تيليجرام"
+                   class="bg-blue-400 hover:bg-blue-500 text-white w-9 h-9 flex items-center justify-center rounded-full transition">
+                    <i class="ri-telegram-line text-lg"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="w-full md:w-3/5">
+            <div class="glass-effect rounded-lg p-6">
+                <!-- Basic Info -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-start">
+                        <h1 class="text-3xl font-bold text-white mb-2">{{ $product->name }}</h1>
+                    </div>
+                    
+                    <!-- Enhanced Rating Display -->
+                    <div class="flex-1 bg-gradient-to-r from-primary/75 to-secondary/75 text-white px-6 py-3 rounded-button font-medium whitespace-nowrap hover:from-primary hover:to-secondary transition-all neon-glow">
+                        <div class="flex items-center">
+                            <div class="ml-2">
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400">
+                                        @php
+                                            $rating = $product->reviews_avg_rating ?? 0;
+                                            $fullStars = floor($rating);
+                                            $halfStar = ($rating - $fullStars) >= 0.5;
+                                            $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                                        @endphp
+
+                                        @for($i = 1; $i <= $fullStars; $i++)
+                                            <i class="ri-star-fill"></i>
+                                        @endfor
+
+                                        @if($halfStar)
+                                            <i class="ri-star-half-fill"></i>
+                                        @endif
+
+                                        @for($i = 1; $i <= $emptyStars; $i++)
+                                            <i class="ri-star-line"></i>
+                                        @endfor
+                                    </div>
+                                    <span class="text-white mr-2">{{ number_format($rating, 1) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-300 mt-2">
+                        @if($product->category)
+                        <div class="flex items-center">
+                            <i class="ri-gamepad-line ml-1"></i>
+                            <span>{{ $product->category->name }}</span>
+                        </div>
+                        @endif
+                        <div class="flex items-center">
+                            <i class="ri-shopping-bag-line ml-1"></i>
+                            <span>{{ $product->sales_count }} مبيعات</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Section -->
+                <div class="mb-6 p-4 bg-[#1a1a1a] rounded-lg">
+                    <div class="flex items-end gap-2">
+                        @if($product->has_discount)
+                            <div class="text-primary font-bold text-3xl">{{ $product->display_price }} ر.س</div>
+                            <div class="text-gray-400 text-lg line-through">{{ $product->display_old_price }} ر.س</div>
+                            <div class="bg-red-600 text-white text-sm px-2 py-1 rounded-md">
+                                خصم {{ $product->discount_percentage }}%
+                            </div>
+                        @else
+                            <div class="text-primary font-bold text-3xl">{{ $product->display_price }} ر.س</div>
+                        @endif
+                    </div>
+                    <div class="mt-4 flex items-center">
+                        <i class="ri-shield-check-line text-green-500 ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Stock Status Alert -->
+                @if($product->status == 'out-of-stock')
+                <div class="mb-6 p-4 bg-red-900/50 rounded-lg text-white">
+                    <div class="flex items-center">
+                        <i class="ri-alert-line text-2xl ml-2"></i>
+                        <span class="font-bold">نفذت الكمية</span>
+                    </div>
+                    <p class="text-sm mt-2">هذا المنتج غير متوفر حالياً في المخزون. يمكنك تصفح منتجات مماثلة أدناه.</p>
+                </div>
+                @endif
+                
+                <!-- Product Attributes and Features (Only for accounts) -->
+                @if(isset($product->type) && $product->type == 'account')
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white mb-3">مميزات الحساب</h2>
+                    <div class="space-y-3">
+                        @if($product->attributes && !empty($product->attributes))
+                        @foreach($product->attributes as $key => $value)
+                        <div class="flex">
+                            <div class="w-1/3 text-gray-400">{{ ucfirst($key) }}:</div>
+                            <div class="w-2/3 text-white">{{ $value }}</div>
+                        </div>
+                        @endforeach
+                        @else
+                        <div class="text-gray-400">لا توجد مميزات محددة لهذا المنتج</div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+                
+                <!-- Custom Product Fields (Only for custom products) -->
+                @if(isset($product->type) && $product->type == 'custom')
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white mb-3">المواصفات المخصصة</h2>
+                    <div class="space-y-3">
+                        @if($product->custom_fields && !empty($product->custom_fields))
+                        <!-- Custom Fields Display -->
+                        @php
+                            $customFields = $product->custom_fields;
+                            // التحقق مما إذا كان النوع هو نص وتحويله إلى مصفوفة
+                            if(is_string($customFields)) {
+                                $customFields = json_decode($customFields, true) ?: [];
+                            }
+                        @endphp
+                        
+                        @foreach($customFields as $field)
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">
+                                {{ $field['label'] ?? 'حقل مخصص' }}
+                                @if(isset($field['required']) && $field['required'])
+                                <span class="text-red-500 mr-1">*</span>
+                                @endif
+                            </label>
+                            @if(isset($field['type']) && $field['type'] == 'text')
+                                <input type="text" name="custom_{{ $field['name'] ?? 'field_'.uniqid() }}" 
+                                    class="w-full bg-[#1a1a1a] border border-gray-700 rounded-lg p-2 text-white"
+                                    placeholder="{{ $field['placeholder'] ?? '' }}"
+                                    {{ isset($field['required']) && $field['required'] ? 'required' : '' }}>
+                            @elseif(isset($field['type']) && $field['type'] == 'select' && isset($field['options']))
+                                @php
+                                    $options = $field['options'];
+                                    if(is_string($options)) {
+                                        $options = json_decode($options, true) ?: [];
+                                    }
+                                @endphp
+                                <select name="custom_{{ $field['name'] ?? 'field_'.uniqid() }}" 
+                                        class="w-full bg-[#1a1a1a] border border-gray-700 rounded-lg p-2 text-white"
+                                        {{ isset($field['required']) && $field['required'] ? 'required' : '' }}>
+                                    <option value="">اختر {{ $field['label'] ?? 'خيار' }}</option>
+                                    @if(is_array($options) || is_object($options))
+                                    @foreach($options as $option)
+                                        <option value="{{ $option['value'] ?? '' }}">{{ $option['label'] ?? '' }}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            @elseif(isset($field['type']) && $field['type'] == 'textarea')
+                                <textarea name="custom_{{ $field['name'] ?? 'field_'.uniqid() }}" 
+                                          class="w-full bg-[#1a1a1a] border border-gray-700 rounded-lg p-2 text-white"
+                                          rows="3" placeholder="{{ $field['placeholder'] ?? '' }}"
+                                          {{ isset($field['required']) && $field['required'] ? 'required' : '' }}></textarea>
+                            @else
+                                <!-- نوع حقل غير معروف -->
+                                <input type="text" name="custom_{{ $field['name'] ?? 'field_'.uniqid() }}" 
+                                    class="w-full bg-[#1a1a1a] border border-gray-700 rounded-lg p-2 text-white"
+                                    placeholder="حقل غير معروف">
+                            @endif
+                            @if(isset($field['description']))
+                                <p class="text-gray-400 text-sm mt-1">{{ $field['description'] }}</p>
+                            @endif
+                        </div>
+                        @endforeach
+                        
+                        <!-- Price Options (if available) -->
+                        @if($product->price_options && !empty($product->price_options))
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">خيارات السعر</label>
+                            @php
+                                $priceOptions = $product->price_options;
+                                // التحقق مما إذا كان النوع هو نص وتحويله إلى مصفوفة
+                                if(is_string($priceOptions)) {
+                                    $priceOptions = json_decode($priceOptions, true) ?: [];
+                                }
+                            @endphp
+                            <select name="price_option" id="price-option-select" 
+                                    class="w-full bg-[#1a1a1a] border border-gray-700 rounded-lg p-2 text-white">
+                                @foreach($priceOptions as $option)
+                                    @php
+                                        $optionName = '';
+                                        $optionPrice = 0;
+                                        
+                                        // تحديد السعر من الخيار
+                                        if(isset($option['price'])) {
+                                            $optionPrice = $option['price'];
+                                        }
+                                        
+                                        // محاولة العثور على وصف الخيار
+                                        if(isset($option['quantity'])) {
+                                            $optionName = $option['quantity'];
+                                        } elseif(isset($option['name'])) {
+                                            $optionName = $option['name'];
+                                        } elseif(isset($option['description'])) {
+                                            $optionName = $option['description'];
+                                        }
+
+                                        // تعيين معرف فريد في حالة عدم وجوده
+                                        $optionId = $option['id'] ?? 'option_'.uniqid();
+                                    @endphp
+                                    <option value="{{ $optionId }}" data-price="{{ $optionPrice }}" data-name="{{ $optionName }}">
+                                        {{ $optionName }} - {{ $optionPrice }} ر.س
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
+                        @else
+                        <div class="text-gray-400">لا توجد حقول مخصصة محددة لهذا المنتج</div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+                
+                <!-- Call To Action -->
+                <div class="mb-6">
+                    <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="product_type" value="product">
+                        <input type="hidden" name="quantity" value="1">
+                        
+                        @if(isset($product->type) && $product->type == 'custom')
+                        <input type="hidden" name="is_custom_product" value="1">
+                        @if($product->price_options && !empty($product->price_options))
+                        <!-- سيتم إضافة حقول السعر المخصص بواسطة JavaScript عند تغيير خيار السعر -->
+                        @else
+                        <input type="hidden" name="custom_price" value="{{ $product->price }}">
+                        @endif
+                        @endif
+                        
+                        <div class="flex gap-4">
+                            <button type="button" id="add-to-cart-btn" class="flex-1 bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-button font-medium whitespace-nowrap hover:opacity-90 transition-all neon-glow {{ $product->status == 'out-of-stock' ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $product->status == 'out-of-stock' ? 'disabled' : '' }}>
+                                <i class="ri-shopping-cart-line ml-2"></i> إضافة إلى السلة
+                            </button>
+                            <a href="{{ $product->status == 'out-of-stock' ? 'javascript:void(0)' : route('cart.buyNow', ['product_id' => $product->id, 'product_type' => 'product']) }}"
+                               id="buy-now-link"
+                               class="flex-1 bg-[#1e1e1e] text-white border border-gray-600 px-6 py-3 rounded-button font-medium whitespace-nowrap hover:bg-[#2a2a2a] transition-all text-center {{ $product->status == 'out-of-stock' ? 'opacity-50 cursor-not-allowed' : '' }}">
+                                <i class="ri-bank-card-line ml-2"></i> شراء الآن
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Product Description and Reviews -->
+                <div class="mb-6">
+                    <!-- Tabs Navigation -->
+                    <div class="border-b border-gray-700 mb-4">
+                        <ul class="flex flex-wrap -mb-px" id="product-tabs">
+                            <li class="mr-2">
+                                <button data-tab="description" class="inline-block py-2 px-4 text-white text-center font-medium border-b-2 border-primary product-tab active">
+                                    <i class="ri-file-list-line ml-1"></i>الوصف
+                                </button>
+                            </li>
+                            <li class="mr-2">
+                                <button data-tab="reviews" class="inline-block py-2 px-4 text-gray-400 text-center font-medium border-b-2 border-transparent hover:border-gray-500 product-tab">
+                                    <i class="ri-star-line ml-1"></i>التقييمات ({{ $reviewsCount ?? 0 }})
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Tab Content - Description -->
+                    <div id="description-tab" class="product-tab-content active">
+                        <div id="description-wrapper" class="relative">
+                            <article class="description-clamp prose prose-invert max-w-none description-content">
+                                <div class="product-description">
+                                    {!! $product->description !!}
+                                </div>
+                            </article>
+                            <div id="show-more-wrapper" class="text-center mt-4 hidden">
+                                <button id="show-more-description"
+                                    class="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-button text-sm font-medium whitespace-nowrap hover:opacity-90 transition-all neon-glow mx-auto flex items-center justify-center">
+                                    المزيد <i class="ri-arrow-down-s-line mr-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Content - Reviews -->
+                    <div id="reviews-tab" class="product-tab-content hidden">
+               
+                        
+                        <!-- Reviews List -->
+                        @if(isset($product->reviews) && $product->reviews->count() > 0)
+                            <div class="space-y-4">
+                                @foreach($product->reviews as $review)
+                                <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-gray-700">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary text-white flex items-center justify-center text-lg font-bold ml-4">
+                                                {{ substr($review->user->name ?? 'م', 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <h4 class="text-white font-medium">{{ $review->user->name ?? 'مستخدم' }}</h4>
+                                                <div class="flex items-center mt-1">
+                                                    <div class="flex text-yellow-400 ml-2">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <i class="{{ $i <= $review->rating ? 'ri-star-fill' : 'ri-star-line' }} text-sm"></i>
+                                                        @endfor
+                                                    </div>
+                                                    <span class="text-xs text-gray-400">{{ $review->created_at->format('Y-m-d') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    @if($review->comment)
+                                    <div class="mt-3 text-gray-300 text-sm pr-14">
+                                        {{ $review->comment }}
+                                    </div>
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <i class="ri-star-smile-line text-5xl text-gray-500 mb-2"></i>
+                                <p class="text-gray-400">لا توجد تقييمات لهذا المنتج حتى الآن</p>
+                                <p class="text-xs text-gray-500 mt-2">كن أول من يقيم هذا المنتج بعد الشراء</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    @if($relatedProducts->count() > 0)
+    <div class="mt-16">
+        <h2 class="text-2xl font-bold text-white mb-6">منتجات مشابهة</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach($relatedProducts as $relatedProduct)
+            <div class="glass-effect rounded-lg overflow-hidden transition-all duration-300 card-hover flex flex-col h-full">
+                <div class="relative">
+                    <div class="h-40 sm:h-48 bg-gradient-to-b from-[#1e1e1e] to-[#121212]" style="background-image: url('{{ $relatedProduct->image_url }}'); background-size: cover; background-position: center;"></div>
+                    @if($relatedProduct->is_featured)
+                    <div class="product-card-badge badge-featured">
+                        مميز
+                    </div>
+                    @elseif($relatedProduct->created_at > now()->subDays(7))
+                    <div class="product-card-badge badge-new">
+                        جديد
+                    </div>
+                    @elseif($relatedProduct->discount_percentage > 0)
+                    <div class="product-card-badge badge-sale">
+                        خصم {{ $relatedProduct->discount_percentage }}%
+                    </div>
+                    @endif
+                    
+                    @if($relatedProduct->status == 'out-of-stock')
+                    <div class="product-card-badge badge-out-of-stock">
+                        نفذت الكمية
+                    </div>
+                    @endif
+                </div>
+                
+                <div class="p-3 sm:p-4 flex flex-col flex-grow">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3">
+                        <h3 class="text-sm sm:text-base font-bold text-white line-clamp-2 leading-tight min-h-[2.5rem]">{{ $relatedProduct->name }}</h3>
+                        @if($relatedProduct->reviews_avg_rating && $relatedProduct->reviews_avg_rating > 0)
+                        <div class="flex items-center text-yellow-400 text-xs sm:text-sm mt-1 sm:mt-0 sm:ml-2 whitespace-nowrap">
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $relatedProduct->reviews_avg_rating)
+                                    <i class="ri-star-fill"></i>
+                                @elseif($i - 0.5 <= $relatedProduct->reviews_avg_rating)
+                                    <i class="ri-star-half-fill"></i>
+                                @else
+                                    <i class="ri-star-line"></i>
+                                @endif
+                            @endfor
+                            <span class="text-gray-400 mr-1 ml-1">{{ number_format($relatedProduct->reviews_avg_rating, 1) }}</span>
+                        </div>
+                        @else
+                        <div class="flex items-center text-yellow-400 text-xs sm:text-sm mt-1 sm:mt-0 sm:ml-2 whitespace-nowrap">
+                            @for($i = 1; $i <= 5; $i++)
+                            <i class="ri-star-line"></i>
+                            @endfor
+                        </div>
+                        @endif
+                    </div>
+                    <div class="space-y-1 sm:space-y-2 mb-4 text-xs sm:text-sm">
+                        <div class="flex items-center text-sm text-gray-300">
+                            <i class="ri-gamepad-line ml-1"></i>
+                            <span>{{ $relatedProduct->category ? $relatedProduct->category->name : 'عام' }}</span>
+                        </div>
+                        @if($relatedProduct->attributes && isset($relatedProduct->attributes['features']))
+                        <div class="flex items-center text-sm text-gray-300">
+                            <i class="ri-vip-crown-line ml-1"></i>
+                            <span>{{ $relatedProduct->attributes['features'] }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="mt-auto">
+                        <div class="mb-3">
+                            @if($relatedProduct->discount_price)
+                            <div class="text-primary font-bold text-xl">{{ $relatedProduct->discount_price }} ر.س</div>
+                            <div class="text-gray-400 text-sm line-through">{{ $relatedProduct->price }} ر.س</div>
+                            @else
+                            <div class="text-primary font-bold text-xl">{{ $relatedProduct->price }} ر.س</div>
+                            @endif
+                        </div>
+                        <a href="{{ route('products.show', $relatedProduct->slug) }}" 
+                           class="block w-full bg-gradient-to-r from-primary to-secondary text-white py-2 rounded-button text-sm font-medium text-center whitespace-nowrap hover:opacity-90 transition-all {{ $relatedProduct->status == 'out-of-stock' ? 'opacity-50 cursor-not-allowed' : '' }}">
+                            {{ $relatedProduct->status == 'out-of-stock' ? 'نفذت الكمية' : 'شراء الآن' }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    // تبديل بين التبويبات (الوصف والتقييمات)
+    $(document).ready(function() {
+        $('.product-tab').on('click', function() {
+            const tabId = $(this).data('tab');
+            
+            // إزالة الحالة النشطة من جميع التبويبات وإخفاء جميع المحتويات
+            $('.product-tab').removeClass('active border-primary').addClass('text-gray-400 border-transparent');
+            $('.product-tab-content').removeClass('active').addClass('hidden');
+            
+            // تنشيط التبويب المحدد وإظهار المحتوى المرتبط به
+            $(this).addClass('active border-primary text-white').removeClass('text-gray-400 border-transparent');
+            $(`#${tabId}-tab`).removeClass('hidden').addClass('active');
+        });
+    });
+
+    // اضافة إلى السلة بواسطة AJAX
+    $(document).ready(function() {
+        // تفاعل معرض الصور (إذا وجد)
+        $('.gallery-thumbnail').on('click', function() {
+            const imgSrc = $(this).attr('data-src');
+            $('#main-product-image').css('background-image', `url('${imgSrc}')`);
+        });
+        
+        // معالجة تحديث السعر للمنتجات المخصصة
+        @if(isset($product->type) && $product->type == 'custom')
+        @php
+            $hasPriceOptions = false;
+            if($product->price_options) {
+                $priceOptions = $product->price_options;
+                if(is_string($priceOptions)) {
+                    $priceOptions = json_decode($priceOptions, true) ?: [];
+                }
+                $hasPriceOptions = !empty($priceOptions);
+            }
+        @endphp
+        
+        @if($hasPriceOptions)
+        // تهيئة أزرار الشراء بناءً على الخيار المحدد افتراضيًا
+        $(function() {
+            // محاكاة تغيير الخيار لتطبيق الإعدادات الأولية
+            $('#price-option-select').trigger('change');
+        });
+        
+        // تحديث السعر عند تغيير الخيار
+        $('#price-option-select').on('change', function() {
+            // إزالة الحقول المخفية السابقة لتجنب التكرار
+            $('input[name="selected_price_option"]').remove();
+            $('input[name="selected_price"]').remove();
+            $('input[name="selected_option_name"]').remove();
+            $('input[name="custom_price"]').remove();
+            
+            // الحصول على السعر من الخيار المحدد
+            const selectedOption = $(this).find('option:selected');
+            const price = selectedOption.data('price');
+            const optionId = selectedOption.val();
+            const optionName = selectedOption.data('name');
+            
+            console.log('تم اختيار:', { optionId, price, optionName });
+            
+            // تحديث عرض السعر في واجهة المستخدم
+            $('.text-primary.font-bold.text-3xl').text(price + ' ر.س');
+            
+            // إضافة معلومات الخيار المحدد إلى النموذج
+            $('#add-to-cart-form').append(`
+                <input type="hidden" name="selected_price_option" value="${optionId}">
+                <input type="hidden" name="selected_price" value="${price}">
+                <input type="hidden" name="selected_option_name" value="${optionName}">
+            `);
+            
+            // تحديث رابط الشراء الآن ليشمل سعر الخدمة المحددة
+            let buyNowUrl = "{{ route('cart.add') }}?product_id={{ $product->id }}&product_type=product";
+            buyNowUrl += `&selected_price_option=${optionId}&selected_price=${price}&selected_option_name=${encodeURIComponent(optionName)}`;
+            $('#buy-now-link').attr('href', buyNowUrl);
+        });
+        @endif
+        @endif
+        
+        // إضافة المنتج إلى السلة
+        $('#add-to-cart-btn').on('click', function() {
+            if ($(this).attr('disabled')) {
+                return;
+            }
+            
+            // جمع البيانات المخصصة (للمنتجات المخصصة فقط)
+            @if(isset($product->type) && $product->type == 'custom')
+            // إزالة البيانات المخصصة السابقة لتجنب التكرار
+            $('input[name="custom_fields_data"]').remove();
+            
+            let customFields = {};
+            let hasRequiredEmpty = false;
+            
+            // جمع البيانات من الحقول المخصصة
+            $('[name^="custom_"]').each(function() {
+                const $field = $(this);
+                const fieldName = $field.attr('name').replace('custom_', '');
+                const fieldValue = $field.val();
+                
+                // التحقق من الحقول المطلوبة
+                if ($field.prop('required') && !fieldValue) {
+                    hasRequiredEmpty = true;
+                    // إبراز الحقل المطلوب غير المملوء
+                    $field.addClass('border-red-500').addClass('shake-animation');
+                    
+                    // إزالة التأثير بعد فترة
+                    setTimeout(() => {
+                        $field.removeClass('shake-animation');
+                    }, 500);
+                }
+                
+                // الحصول على عنوان الحقل من الترويسة المرتبطة بالحقل
+                const fieldLabel = $field.closest('.mb-4').find('label').first().clone().children().remove().end().text().trim();
+                
+                // تخزين البيانات بطريقة منظمة مع العنوان والقيمة
+                customFields[fieldName] = {
+                    value: fieldValue,
+                    label: fieldLabel || fieldName  // استخدام اسم الحقل إذا لم يتم العثور على عنوان
+                };
+            });
+            
+            // إذا كانت هناك حقول مطلوبة غير مملوءة، توقف عن الإرسال
+            if (hasRequiredEmpty) {
+                showAlert('error', 'يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
+            // جمع معلومات خيار السعر المحدد
+            const selectedPrice = $('input[name="selected_price"]').val();
+            const selectedOptionName = $('input[name="selected_option_name"]').val();
+            
+            // إضافة معلومات خيار السعر المحدد إلى البيانات المخصصة
+            if (selectedPrice && selectedOptionName) {
+                customFields.price_option = {
+                    price: selectedPrice,
+                    name: selectedOptionName
+                };
+                
+                console.log('تضمين معلومات السعر:', selectedPrice, selectedOptionName);
+            }
+            
+            // إضافة البيانات المخصصة كحقل مخفي في النموذج
+            $('#add-to-cart-form').append(
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'custom_fields_data',
+                    value: JSON.stringify(customFields)
+                })
+            );
+            @endif
+            
+            // إظهار تأثير تحميل
+            const button = $(this);
+            const originalText = button.html();
+            button.html('<i class="ri-loader-4-line animate-spin ml-2"></i> جاري الإضافة...');
+            button.prop('disabled', true);
+            
+            // إرسال طلب AJAX
+            $.ajax({
+                url: $('#add-to-cart-form').attr('action'),
+                type: 'POST',
+                data: $('#add-to-cart-form').serialize(),
+                success: function(response) {
+                    // تحديث عدد السلة في الشريط العلوي
+                    $('.cart-count').text(response.cart_count);
+                    
+                    // إظهار إشعار نجاح
+                    showAlert('success', 'تمت إضافة المنتج إلى سلة التسوق');
+                    
+                    // إعادة زر الإضافة إلى السلة إلى حالته الأصلية
+                    button.html(originalText);
+                    button.prop('disabled', false);
+                },
+                error: function(xhr) {
+                    // إظهار إشعار خطأ
+                    let errorMessage = 'حدث خطأ أثناء إضافة المنتج إلى السلة';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    showAlert('error', errorMessage);
+                    
+                    // إعادة زر الإضافة إلى السلة إلى حالته الأصلية
+                    button.html(originalText);
+                    button.prop('disabled', false);
+                }
+            });
+        });
+    });
+    
+    // عرض إشعار
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg flex items-center glass-effect max-w-md';
+        alertDiv.role = 'alert';
+        
+        if (type === 'success') {
+            alertDiv.classList.add('bg-gradient-to-r', 'from-green-500', 'to-green-600', 'text-white');
+            alertDiv.innerHTML = `
+                <i class="ri-check-line text-xl ml-3"></i>
+                <div>${message}</div>
+                <button type="button" class="text-white hover:text-gray-200 mr-auto" onclick="this.parentElement.remove()">
+                    <i class="ri-close-line"></i>
+                </button>
+            `;
+        } else if (type === 'error') {
+            alertDiv.classList.add('bg-gradient-to-r', 'from-red-500', 'to-red-600', 'text-white');
+            alertDiv.innerHTML = `
+                <i class="ri-error-warning-line text-xl ml-3"></i>
+                <div>${message}</div>
+                <button type="button" class="text-white hover:text-gray-200 mr-auto" onclick="this.parentElement.remove()">
+                    <i class="ri-close-line"></i>
+                </button>
+            `;
+        }
+        
+        document.body.appendChild(alertDiv);
+        
+        // إزالة الإشعار بعد 3 ثوانٍ
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    $('#show-more-tags').on('click', function() {
+        const tagsList = $('#tags-list');
+        const button = $(this);
+        if (!tagsList.hasClass('expanded')) {
+            tagsList.addClass('expanded');
+            button.html('أقل <i class="ri-arrow-up-s-line mr-1"></i>');
+        } else {
+            tagsList.removeClass('expanded');
+            button.html('المزيد <i class="ri-arrow-down-s-line mr-1"></i>');
+        }
+    });
+
+    // التحقق من ارتفاع المحتوى وإظهار/إخفاء زر المزيد
+    $(document).ready(function() {
+        const descriptionContent = $('.description-clamp');
+        const showMoreWrapper = $('#show-more-wrapper');
+        const lineHeight = parseInt(descriptionContent.css('line-height'));
+        const maxHeight = lineHeight * 6; // 6 أسطر
+
+        // التحقق من ارتفاع المحتوى
+        if (descriptionContent[0].scrollHeight > maxHeight) {
+            showMoreWrapper.removeClass('hidden');
+        }
+
+        $('#show-more-description').on('click', function() {
+            const desc = $('.description-clamp');
+            const button = $(this);
+            if (!desc.hasClass('expanded')) {
+                desc.addClass('expanded');
+                button.html('أقل <i class="ri-arrow-up-s-line mr-1"></i>');
+            } else {
+                desc.removeClass('expanded');
+                button.html('المزيد <i class="ri-arrow-down-s-line mr-1"></i>');
+            }
+        });
+    });
+
+    let allImages = @json($allImages);
+    let currentImageIndex = 0;
+
+    function showMainImage(index) {
+        if (index < 0) index = allImages.length - 1;
+        if (index >= allImages.length) index = 0;
+        currentImageIndex = index;
+        document.querySelector('.glass-effect .bg-cover').style.backgroundImage = `url('${allImages[currentImageIndex]}')`;
+        // تحديث تمييز الصورة المصغرة
+        document.querySelectorAll('.gallery-thumbnail').forEach((thumb, idx) => {
+            if (idx + 1 === currentImageIndex) {
+                thumb.classList.add('border-primary');
+                thumb.classList.remove('border-gray-600');
+            } else {
+                thumb.classList.remove('border-primary');
+                thumb.classList.add('border-gray-600');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // تفعيل النقر على المصغرات
+        document.querySelectorAll('.gallery-thumbnail').forEach(function(thumb) {
+            thumb.addEventListener('click', function() {
+                showMainImage(parseInt(this.getAttribute('data-index')) - 1);
+            });
+        });
+        // أزرار التنقل
+        let prevBtn = document.getElementById('gallery-prev');
+        let nextBtn = document.getElementById('gallery-next');
+        if (prevBtn && nextBtn) {
+            prevBtn.onclick = function() { showMainImage(currentImageIndex - 1); };
+            nextBtn.onclick = function() { showMainImage(currentImageIndex + 1); };
+        }
+        // تمييز أول صورة (الرئيسية) عند التحميل
+        if (allImages.length > 0) {
+            showMainImage(0);
+        }
+    });
+</script>
+@endpush 

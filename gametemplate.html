@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charge Store - Gaming & Social Accounts</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4ade80',secondary:'#1e293b'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+background-color: #0f172a;
+color: #e2e8f0;
+font-family: 'Inter', sans-serif;
+direction: rtl;
+}
+.flip-icon {
+transform: scaleX(-1);
+}
+.glow {
+box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+}
+.card-glow:hover {
+box-shadow: 0 0 20px rgba(74, 222, 128, 0.7);
+transform: translateY(-2px);
+transition: all 0.3s ease;
+}
+.sidebar-item:hover {
+background-color: rgba(74, 222, 128, 0.1);
+}
+.active-sidebar-item {
+background-color: rgba(74, 222, 128, 0.15);
+border-left: 3px solid #4ade80;
+}
+input:focus {
+outline: none;
+box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.3);
+}
+.product-card {
+transition: all 0.3s ease;
+background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.product-card:hover {
+transform: translateY(-4px);
+box-shadow: 0 0 25px rgba(74, 222, 128, 0.4);
+}
+.add-to-basket {
+transition: all 0.2s ease;
+}
+.add-to-basket:hover {
+transform: scale(1.05);
+box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+}
+.badge {
+background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+.badge.blue {
+background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+.badge.purple {
+background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="flex min-h-screen">
+<!-- Left Sidebar -->
+<div class="w-64 border-r border-gray-800 flex flex-col">
+<!-- Logo -->
+<div class="p-4 flex items-center gap-2">
+<h1 class="text-xl font-['Pacifico'] text-white">logo</h1>
+<div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+<i class="ri-gamepad-line text-white flip-icon"></i>
+</div>
+</div>
+<!-- Main Navigation -->
+<div class="mt-6 flex-1">
+<div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+Main Menu
+</div>
+<div class="mt-2 space-y-1 px-3">
+<a href="#" class="sidebar-item active-sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-home-4-line"></i>
+</div>
+<span>Home</span>
+</a>
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-gamepad-line"></i>
+</div>
+<span>Game Accounts</span>
+</a>
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-user-3-line"></i>
+</div>
+<span>Social Accounts</span>
+</a>
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-gift-line"></i>
+</div>
+<span>Gift Cards</span>
+</a>
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-history-line"></i>
+</div>
+<span>Purchase History</span>
+</a>
+</div>
+<div class="px-4 py-2 mt-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+Account
+</div>
+<div class="mt-2 space-y-1 px-3">
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-wallet-3-line"></i>
+</div>
+<span>Wallet</span>
+</a>
+<a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-300">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400">
+<i class="ri-settings-3-line"></i>
+</div>
+<span>Settings</span>
+</a>
+</div>
+</div>
+<!-- Footer -->
+<div class="p-4 border-t border-gray-800 text-xs text-gray-500">
+<div class="flex items-center justify-between">
+<a href="#" class="hover:text-gray-300">Terms</a>
+<a href="#" class="hover:text-gray-300">Privacy</a>
+<a href="#" class="hover:text-gray-300">Help</a>
+</div>
+<div class="mt-2">© 2025 Charge Store</div>
+</div>
+</div>
+<!-- Main Content -->
+<div class="flex-1 flex flex-col">
+<!-- Top Navigation -->
+<div class="h-16 border-b border-gray-800 flex items-center justify-between px-6">
+<!-- Search -->
+<div class="w-96">
+<div class="relative">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<i class="ri-search-line text-gray-400"></i>
+</div>
+<input type="text" class="block w-full pr-10 pl-3 py-2 border-none bg-gray-800 rounded-md text-sm text-gray-300 placeholder-gray-500 text-right" placeholder="البحث عن الألعاب والحسابات والبطاقات...">
+</div>
+</div>
+<!-- Right Side -->
+<div class="flex items-center gap-6">
+<!-- Balance -->
+<div class="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-md">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium">7,220</span>
+</div>
+<!-- Cart -->
+<button class="relative p-1.5 rounded-full hover:bg-gray-800">
+<i class="ri-shopping-cart-2-line text-xl text-gray-300"></i>
+<span class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary text-xs text-gray-900 font-bold">3</span>
+</button>
+<!-- Notifications -->
+<button class="relative p-1.5 rounded-full hover:bg-gray-800">
+<i class="ri-notification-3-line text-xl text-gray-300"></i>
+<span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+</button>
+<!-- User -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-gray-700 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=professional%2520gaming%2520avatar%252C%2520neon%2520green%2520accents%252C%2520dark%2520background%252C%2520high%2520quality%252C%2520detailed&width=100&height=100&seq=user1&orientation=squarish" alt="User" class="w-full h-full object-cover">
+</div>
+<span class="text-sm font-medium">GamerPro</span>
+<i class="ri-arrow-down-s-line text-gray-400"></i>
+</div>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex-1 p-6 overflow-auto">
+<!-- Banner -->
+<div class="relative rounded-lg overflow-hidden mb-8 h-36">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520digital%2520store%2520banner%252C%2520treasure%2520chest%2520with%2520glowing%2520green%2520items%252C%2520dark%2520background%2520with%2520neon%2520accents%252C%2520high%2520quality%252C%2520detailed&width=1200&height=300&seq=banner1&orientation=landscape" alt="Banner" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center">
+<div class="px-8">
+<div class="text-sm font-semibold text-primary mb-1">Limited Time Offer</div>
+<h2 class="text-2xl font-bold text-white mb-2">Special Rewards</h2>
+<p class="text-sm text-gray-300">Unlock exclusive in-game items and bonuses!</p>
+</div>
+</div>
+</div>
+<!-- Categories -->
+<div class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold">Categories</h2>
+<a href="#" class="text-sm text-primary flex items-center gap-1">
+<i class="ri-arrow-left-s-line"></i>
+عرض الكل
+</a>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<div class="bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center transition-all hover:bg-gray-700 cursor-pointer card-glow">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+<i class="ri-gamepad-line text-2xl text-primary"></i>
+</div>
+<span class="text-sm font-medium">Game Credits</span>
+</div>
+<div class="bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center transition-all hover:bg-gray-700 cursor-pointer card-glow">
+<div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-3">
+<i class="ri-facebook-fill text-2xl text-blue-500"></i>
+</div>
+<span class="text-sm font-medium">Social Accounts</span>
+</div>
+<div class="bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center transition-all hover:bg-gray-700 cursor-pointer card-glow">
+<div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+<i class="ri-google-play-fill text-2xl text-red-500"></i>
+</div>
+<span class="text-sm font-medium">Google Play</span>
+</div>
+<div class="bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center transition-all hover:bg-gray-700 cursor-pointer card-glow">
+<div class="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center mb-3">
+<i class="ri-tiktok-fill text-2xl text-pink-500"></i>
+</div>
+<span class="text-sm font-medium">TikTok Coins</span>
+</div>
+<div class="bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center transition-all hover:bg-gray-700 cursor-pointer card-glow">
+<div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center mb-3">
+<i class="ri-chat-3-line text-2xl text-yellow-500"></i>
+</div>
+<span class="text-sm font-medium">Chat Credits</span>
+</div>
+</div>
+</div>
+<!-- Featured Products -->
+<div class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold">Featured Accounts</h2>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-gray-800 text-sm font-medium">All</button>
+<button class="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">Popular</button>
+<button class="px-3 py-1.5 rounded-full bg-gray-800 text-sm font-medium">New</button>
+<button class="px-3 py-1.5 rounded-full bg-gray-800 text-sm font-medium">Discounted</button>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<!-- Product Card 1 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=futuristic%2520cyber%2520warrior%2520with%2520glowing%2520orange%2520visor%2520helmet%252C%2520dark%2520background%252C%2520high%2520quality%2520gaming%2520character%252C%2520detailed%2520textures%252C%2520dramatic%2520lighting%252C%2520professional%2520product%2520photography&width=400&height=400&seq=char1&orientation=portrait" alt="Gaming Character" class="w-full h-full object-cover object-top">
+<div class="absolute top-3 right-3 badge text-xs font-bold px-2 py-1 rounded">LEGENDARY</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Cyber Warrior</h3>
+<div class="text-xs text-gray-300">Level 85 • Full Equipment</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>8.1M</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Premium Account</span>
+<div class="flex items-center gap-1">
+<i class="ri-time-line"></i>
+<span>3 months ago</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">2,450</span>
+</div>
+<div class="flex">
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av1&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av2&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden bg-gray-700 flex items-center justify-center text-xs">
+<span>5+</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=futuristic%2520soldier%2520with%2520neon%2520blue%2520helmet%2520and%2520visor%252C%2520dark%2520background%252C%2520high%2520quality%2520gaming%2520character%252C%2520detailed%2520textures%252C%2520dramatic%2520lighting%252C%2520professional%2520product%2520photography&width=400&height=400&seq=char2&orientation=portrait" alt="Gaming Character" class="w-full h-full object-cover object-top">
+<div class="absolute top-3 left-3 badge blue text-xs font-bold px-2 py-1 rounded">RARE</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Neo Soldier</h3>
+<div class="text-xs text-gray-300">Level 72 • Premium Weapons</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>5.3M</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Premium Account</span>
+<div class="flex items-center gap-1">
+<i class="ri-time-line"></i>
+<span>3 months ago</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">1,850</span>
+</div>
+<div class="flex">
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av3&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av4&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden bg-gray-700 flex items-center justify-center text-xs">
+<span>3+</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=dark%2520armored%2520warrior%2520with%2520glowing%2520blue%2520eyes%2520and%2520horns%252C%2520dark%2520background%252C%2520high%2520quality%2520gaming%2520character%252C%2520detailed%2520textures%252C%2520dramatic%2520lighting%252C%2520professional%2520product%2520photography&width=400&height=400&seq=char3&orientation=portrait" alt="Gaming Character" class="w-full h-full object-cover object-top">
+<div class="absolute top-3 left-3 badge purple text-xs font-bold px-2 py-1 rounded">EPIC</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Dark Warlord</h3>
+<div class="text-xs text-gray-300">Level 90 • Mythic Gear</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>6.1M</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Premium Account</span>
+<div class="flex items-center gap-1">
+<i class="ri-time-line"></i>
+<span>3 months ago</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">3,200</span>
+</div>
+<div class="flex">
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av5&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden -mr-1">
+<img src="https://readdy.ai/api/search-image?query=gaming%2520avatar%2520icon%252C%2520minimal%252C%2520profile%2520picture&width=50&height=50&seq=av6&orientation=squarish" alt="" class="w-full h-full object-cover">
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-gray-900 overflow-hidden bg-gray-700 flex items-center justify-center text-xs">
+<span>7+</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Recently Added -->
+<div>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold">Recently Added</h2>
+<a href="#" class="text-sm text-primary flex items-center gap-1">
+<i class="ri-arrow-left-s-line"></i>
+عرض الكل
+</a>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<!-- Product Card 4 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=Google%2520Play%2520gift%2520card%2520with%2520glowing%2520effect%252C%2520digital%2520gift%2520card%252C%2520dark%2520background%2520with%2520green%2520and%2520yellow%2520accents%252C%2520high%2520quality%252C%2520detailed&width=400&height=300&seq=product4&orientation=landscape" alt="Google Play" class="w-full h-full object-cover">
+<div class="absolute top-3 right-3 badge text-xs font-bold px-2 py-1 rounded">GIFT CARD</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Google Play Card</h3>
+<div class="text-xs text-gray-300">Digital Delivery • Instant</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>1.5k</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Gift Card</span>
+<div class="flex items-center gap-1">
+<i class="ri-stock-line"></i>
+<span>74 remaining</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">From 150</span>
+</div>
+<div class="flex items-center gap-1 text-xs text-gray-400">
+<i class="ri-star-fill text-yellow-400"></i>
+<span>4.8 (120 reviews)</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=Discord%2520Nitro%2520subscription%2520with%2520glowing%2520blue%2520effect%252C%2520digital%2520gaming%2520service%252C%2520dark%2520background%2520with%2520blue%2520and%2520purple%2520accents%252C%2520high%2520quality%252C%2520detailed&width=400&height=300&seq=product5&orientation=landscape" alt="Discord Nitro" class="w-full h-full object-cover">
+<div class="absolute top-3 left-3 badge blue text-xs font-bold px-2 py-1 rounded">SUBSCRIPTION</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Discord Nitro</h3>
+<div class="text-xs text-gray-300">Premium • 1 Month</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>2.2k</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Subscription</span>
+<div class="flex items-center gap-1">
+<i class="ri-stock-line"></i>
+<span>1,500 remaining</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">200</span>
+</div>
+<div class="flex items-center gap-1 text-xs text-gray-400">
+<i class="ri-star-fill text-yellow-400"></i>
+<span>4.9 (342 reviews)</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="product-card rounded-lg overflow-hidden">
+<div class="h-56 relative">
+<img src="https://readdy.ai/api/search-image?query=Premium%2520social%2520media%2520account%2520with%2520glowing%2520effect%252C%2520digital%2520social%2520account%252C%2520dark%2520background%2520with%2520orange%2520and%2520yellow%2520accents%252C%2520high%2520quality%252C%2520detailed&width=400&height=300&seq=product6&orientation=landscape" alt="Social Account" class="w-full h-full object-cover">
+<div class="absolute top-3 left-3 badge purple text-xs font-bold px-2 py-1 rounded">ACCOUNT</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-white">Premium Social Account</h3>
+<div class="text-xs text-gray-300">Verified • 50k Followers</div>
+</div>
+<div class="flex items-center gap-1 text-xs bg-black/50 px-2 py-1 rounded-full">
+<i class="ri-eye-line"></i>
+<span>1.9k</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between text-sm text-gray-400 mb-3">
+<span>Social Account</span>
+<div class="flex items-center gap-1">
+<i class="ri-stock-line"></i>
+<span>5 remaining</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-1">
+<i class="ri-coins-line text-yellow-400"></i>
+<span class="font-medium text-white">350</span>
+</div>
+<div class="flex items-center gap-1 text-xs text-gray-400">
+<i class="ri-star-fill text-yellow-400"></i>
+<span>4.7 (89 reviews)</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-gray-900 font-medium rounded-button flex items-center justify-center gap-2 hover:bg-primary/90 whitespace-nowrap add-to-basket">
+<i class="ri-shopping-cart-2-line flip-icon"></i>
+إضافة إلى السلة
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script id="categoryInteraction">
+document.addEventListener('DOMContentLoaded', function() {
+const categoryCards = document.querySelectorAll('.card-glow');
+categoryCards.forEach(card => {
+card.addEventListener('mouseenter', function() {
+this.classList.add('transform', 'scale-105');
+this.style.boxShadow = '0 0 20px rgba(74, 222, 128, 0.7)';
+});
+card.addEventListener('mouseleave', function() {
+this.classList.remove('transform', 'scale-105');
+this.style.boxShadow = '';
+});
+});
+});
+</script>
+<script id="sidebarInteraction">
+document.addEventListener('DOMContentLoaded', function() {
+const sidebarItems = document.querySelectorAll('.sidebar-item');
+sidebarItems.forEach(item => {
+item.addEventListener('click', function(e) {
+e.preventDefault();
+// Remove active class from all items
+sidebarItems.forEach(i => {
+i.classList.remove('active-sidebar-item');
+});
+// Add active class to clicked item
+this.classList.add('active-sidebar-item');
+});
+});
+});
+</script>
+<script id="filterInteraction">
+document.addEventListener('DOMContentLoaded', function() {
+const filterButtons = document.querySelectorAll('.px-3.py-1\\.5.rounded-full');
+filterButtons.forEach(button => {
+button.addEventListener('click', function() {
+// Remove active class from all buttons
+filterButtons.forEach(btn => {
+btn.classList.remove('bg-primary/10', 'text-primary');
+btn.classList.add('bg-gray-800');
+});
+// Add active class to clicked button
+this.classList.remove('bg-gray-800');
+this.classList.add('bg-primary/10', 'text-primary');
+});
+});
+});
+</script>
+<script id="basketInteraction">
+document.addEventListener('DOMContentLoaded', function() {
+const addToBasketButtons = document.querySelectorAll('.add-to-basket');
+addToBasketButtons.forEach(button => {
+button.addEventListener('click', function() {
+// Visual feedback
+this.classList.add('bg-green-600');
+this.innerHTML = '<i class="ri-check-line"></i> تمت الإضافة إلى السلة';
+// Reset after animation
+setTimeout(() => {
+this.classList.remove('bg-green-600');
+this.innerHTML = '<i class="ri-shopping-cart-2-line flip-icon"></i> إضافة إلى السلة';
+}, 1500);
+// Update cart count (this would normally connect to a cart system)
+const cartBadge = document.querySelector('.ri-shopping-cart-2-line').nextElementSibling;
+const currentCount = parseInt(cartBadge.textContent);
+cartBadge.textContent = currentCount + 1;
+});
+});
+});
+</script>
+</body>
+</html>

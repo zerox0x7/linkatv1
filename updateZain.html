@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offer Timer Styles Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#6366f1',secondary:'#8b5cf6'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:root {
+--primary-color: #6366f1;
+--secondary-color: #8b5cf6;
+}
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Inter', sans-serif;
+background-color: #0f172a;
+color: #e2e8f0;
+}
+.timer-card {
+transition: all 0.3s ease;
+}
+.timer-card:hover {
+transform: translateY(-8px);
+}
+.timer-card.selected {
+border: 2px solid #6366f1;
+box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+.flip-card {
+perspective: 1000px;
+}
+.flip-card-inner {
+transition: transform 0.6s;
+transform-style: preserve-3d;
+}
+.flip-card-front, .flip-card-back {
+backface-visibility: hidden;
+}
+.flip-card-back {
+transform: rotateY(180deg);
+}
+.circular-progress {
+position: relative;
+height: 120px;
+width: 120px;
+border-radius: 50%;
+background: conic-gradient(#6366f1 0deg, #1e293b 0deg);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.circular-progress::before {
+content: "";
+position: absolute;
+height: 100px;
+width: 100px;
+border-radius: 50%;
+background-color: #1e293b;
+}
+.wave-container {
+position: relative;
+overflow: hidden;
+border-radius: 12px;
+}
+.wave {
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+height: 60%;
+background: linear-gradient(to bottom, rgba(99, 102, 241, 0.8), rgba(139, 92, 246, 0.6));
+border-radius: 0 0 12px 12px;
+}
+.wave::before, .wave::after {
+content: "";
+position: absolute;
+top: -20px;
+left: 0;
+width: 200%;
+height: 20px;
+background-repeat: repeat-x;
+border-radius: 100%;
+}
+.wave::before {
+background-image: radial-gradient(circle at 10px -5px, transparent 12px, rgba(99, 102, 241, 0.8) 13px);
+}
+.wave::after {
+background-image: radial-gradient(circle at 10px -5px, transparent 12px, rgba(139, 92, 246, 0.6) 13px);
+left: -25px;
+}
+.hexagon {
+position: relative;
+width: 60px;
+height: 34.64px;
+background-color: #2d3748;
+margin: 17.32px 0;
+}
+.hexagon:before,
+.hexagon:after {
+content: "";
+position: absolute;
+width: 0;
+border-left: 30px solid transparent;
+border-right: 30px solid transparent;
+}
+.hexagon:before {
+bottom: 100%;
+border-bottom: 17.32px solid #2d3748;
+}
+.hexagon:after {
+top: 100%;
+border-top: 17.32px solid #2d3748;
+}
+.hexagon.active {
+background-color: #6366f1;
+}
+.hexagon.active:before {
+border-bottom-color: #6366f1;
+}
+.hexagon.active:after {
+border-top-color: #6366f1;
+}
+input[type="color"] {
+-webkit-appearance: none;
+border: none;
+width: 32px;
+height: 32px;
+padding: 0;
+cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+border: none;
+border-radius: 8px;
+}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="container mx-auto px-4 py-12 max-w-7xl">
+<div class="mb-12 text-center">
+<h1 class="text-3xl font-bold mb-2">Offer Timer Styles</h1>
+<p class="text-gray-400 max-w-2xl mx-auto">Choose from our collection of modern, eye-catching countdown timers to boost your sales and create urgency for your special offers.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Timer Style 1: Minimal Circle -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Minimal Circle</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg">
+<div class="circular-progress mb-4" style="background: conic-gradient(#6366f1 270deg, #1e293b 0deg);">
+<div class="relative flex items-center justify-center">
+<span class="text-2xl font-bold">45:12</span>
+</div>
+</div>
+<div class="text-center mt-4">
+<p class="text-sm text-gray-400 mb-1">SUMMER SALE ENDS IN</p>
+<p class="font-medium">Get 30% off all products</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Primary Color</span>
+<input type="color" value="#6366f1" class="color-picker rounded">
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Text Style</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Minimal</option>
+<option>Bold</option>
+<option>Classic</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Timer Style 2: Modern Split Flip -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Split Flip</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg">
+<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">BLACK FRIDAY OFFER</p>
+<p class="font-medium">Buy one get one free</p>
+</div>
+<div class="flex space-x-3 justify-center">
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">02</div>
+<div class="text-xs text-gray-400">DAYS</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">18</div>
+<div class="text-xs text-gray-400">HRS</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">45</div>
+<div class="text-xs text-gray-400">MIN</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">33</div>
+<div class="text-xs text-gray-400">SEC</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Card Color</span>
+<input type="color" value="#374151" class="color-picker rounded">
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Animation</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Flip</option>
+<option>Slide</option>
+<option>Fade</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Timer Style 3: Linear Progress -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Linear Progress</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg">
+<div class="text-center mb-4 w-full">
+<p class="text-sm text-gray-400 mb-1">FLASH SALE ENDS IN</p>
+<div class="flex justify-center space-x-2 mb-3">
+<span class="text-xl font-bold">12h 34m 56s</span>
+</div>
+<div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+<div class="h-3 rounded-full bg-gradient-to-r from-primary to-secondary" style="width: 65%"></div>
+</div>
+<p class="font-medium">Up to 50% off selected items</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Progress Color</span>
+<div class="flex space-x-2">
+<input type="color" value="#6366f1" class="color-picker rounded">
+<input type="color" value="#8b5cf6" class="color-picker rounded">
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Progress Style</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Gradient</option>
+<option>Solid</option>
+<option>Striped</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Timer Style 4: Geometric Countdown -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Geometric</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg">
+<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-3">HOLIDAY SPECIAL OFFER</p>
+</div>
+<div class="flex justify-center space-x-6 mb-4">
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">01</span>
+</div>
+<span class="text-xs text-gray-400">DAYS</span>
+</div>
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">12</span>
+</div>
+<span class="text-xs text-gray-400">HRS</span>
+</div>
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">45</span>
+</div>
+<span class="text-xs text-gray-400">MIN</span>
+</div>
+<div class="text-center">
+<div class="hexagon flex items-center justify-center mb-1">
+<span class="text-lg font-bold">20</span>
+</div>
+<span class="text-xs text-gray-400">SEC</span>
+</div>
+</div>
+<p class="font-medium">25% off all premium products</p>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Shape Color</span>
+<input type="color" value="#6366f1" class="color-picker rounded">
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Shape Style</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Hexagon</option>
+<option>Circle</option>
+<option>Diamond</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Timer Style 5: Wave Timer -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Wave Timer</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg">
+<div class="wave-container w-full h-48 flex flex-col items-center justify-center mb-2 relative">
+<div class="text-center z-10 mb-4">
+<p class="text-sm text-gray-300 mb-1">SUMMER COLLECTION</p>
+<p class="text-2xl font-bold">08:23:14</p>
+</div>
+<div class="wave"></div>
+</div>
+<p class="font-medium text-center">Limited time offer - 40% discount</p>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Wave Color</span>
+<div class="flex space-x-2">
+<input type="color" value="#6366f1" class="color-picker rounded">
+<input type="color" value="#8b5cf6" class="color-picker rounded">
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Wave Speed</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Normal</option>
+<option>Slow</option>
+<option>Fast</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Timer Style 6: Neon Glow -->
+<div class="timer-card bg-gray-800 rounded-lg p-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-xl font-semibold">Neon Glow</h3>
+<div class="flex items-center space-x-2">
+<button class="preview-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-eye-line mr-1"></i> Preview
+</button>
+<button class="select-btn bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-button text-sm whitespace-nowrap">
+<i class="ri-check-line mr-1"></i> Select
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg">
+<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">CYBER MONDAY DEAL</p>
+</div>
+<div class="flex justify-center space-x-2 mb-4">
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">23</div>
+<div class="text-xs text-gray-400">HOURS</div>
+</div>
+<div class="flex items-center text-xl">:</div>
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">59</div>
+<div class="text-xs text-gray-400">MINS</div>
+</div>
+<div class="flex items-center text-xl">:</div>
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">42</div>
+<div class="text-xs text-gray-400">SECS</div>
+</div>
+</div>
+<p class="font-medium">Tech gadgets up to 60% off</p>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<div class="flex justify-between items-center mb-3">
+<span class="text-sm text-gray-400">Glow Color</span>
+<input type="color" value="#6366f1" class="color-picker rounded">
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-gray-400">Glow Intensity</span>
+<select class="bg-gray-700 text-white text-sm rounded-button px-3 py-2 pr-8 border-none">
+<option>Medium</option>
+<option>Low</option>
+<option>High</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 bg-gray-800 rounded-lg p-6 shadow-lg">
+<h2 class="text-xl font-semibold mb-4">Preview Your Selected Timer</h2>
+<div class="bg-gray-900 p-6 rounded-lg flex flex-col items-center justify-center">
+<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<!-- Default preview (Minimal Circle) -->
+<div class="circular-progress mb-4" style="background: conic-gradient(#6366f1 270deg, #1e293b 0deg);">
+<div class="relative flex items-center justify-center">
+<span class="text-2xl font-bold">45:12</span>
+</div>
+</div>
+<div class="text-center mt-4">
+<p class="font-medium">Get 30% off all products</p>
+</div>
+</div>
+<div class="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<div class="flex flex-col md:flex-row gap-4">
+<div>
+<label class="block text-sm text-gray-400 mb-1">Offer Title</label>
+<input type="text" value="Special Discount Ends In" class="w-full bg-gray-700 text-white rounded-button px-3 py-2 border-none">
+</div>
+<div>
+<label class="block text-sm text-gray-400 mb-1">Offer Description</label>
+<input type="text" value="Get 30% off all products" class="w-full bg-gray-700 text-white rounded-button px-3 py-2 border-none">
+</div>
+</div>
+<div>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-button font-medium whitespace-nowrap">
+<i class="ri-save-line mr-1"></i> Save & Apply
+</button>
+</div>
+</div>
+</div>
+</div>
+<script id="timer-selection">
+document.addEventListener('DOMContentLoaded', function() {
+const timerCards = document.querySelectorAll('.timer-card');
+const selectButtons = document.querySelectorAll('.select-btn');
+const previewButtons = document.querySelectorAll('.preview-btn');
+const previewContainer = document.querySelector('.bg-gray-900.p-6.rounded-lg');
+// Preview content for each timer style
+const previewContents = [
+// Minimal Circle
+`<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<div class="circular-progress mb-4" style="background: conic-gradient(#6366f1 270deg, #1e293b 0deg);">
+<div class="relative flex items-center justify-center">
+<span class="text-2xl font-bold">45:12</span>
+</div>
+</div>
+<div class="text-center mt-4">
+<p class="font-medium">Get 30% off all products</p>
+</div>`,
+// Split Flip
+`<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<div class="flex space-x-3 justify-center mb-4">
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">02</div>
+<div class="text-xs text-gray-400">DAYS</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">18</div>
+<div class="text-xs text-gray-400">HRS</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">45</div>
+<div class="text-xs text-gray-400">MIN</div>
+</div>
+</div>
+<div class="flip-card">
+<div class="bg-gray-700 p-2 rounded-md w-16 text-center">
+<div class="text-xl font-bold">33</div>
+<div class="text-xs text-gray-400">SEC</div>
+</div>
+</div>
+</div>
+<div class="text-center">
+<p class="font-medium">Get 30% off all products</p>
+</div>`,
+// Linear Progress
+`<div class="text-center mb-4 w-full">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+<div class="flex justify-center space-x-2 mb-3">
+<span class="text-xl font-bold">12h 34m 56s</span>
+</div>
+<div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+<div class="h-3 rounded-full bg-gradient-to-r from-primary to-secondary" style="width: 65%"></div>
+</div>
+<p class="font-medium">Get 30% off all products</p>
+</div>`,
+// Geometric
+`<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<div class="flex justify-center space-x-6 mb-4">
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">01</span>
+</div>
+<span class="text-xs text-gray-400">DAYS</span>
+</div>
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">12</span>
+</div>
+<span class="text-xs text-gray-400">HRS</span>
+</div>
+<div class="text-center">
+<div class="hexagon active flex items-center justify-center mb-1">
+<span class="text-lg font-bold">45</span>
+</div>
+<span class="text-xs text-gray-400">MIN</span>
+</div>
+<div class="text-center">
+<div class="hexagon flex items-center justify-center mb-1">
+<span class="text-lg font-bold">20</span>
+</div>
+<span class="text-xs text-gray-400">SEC</span>
+</div>
+</div>
+<div class="text-center">
+<p class="font-medium">Get 30% off all products</p>
+</div>`,
+// Wave Timer
+`<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<div class="wave-container w-full h-48 flex flex-col items-center justify-center mb-2 relative">
+<div class="text-center z-10 mb-4">
+<p class="text-2xl font-bold">08:23:14</p>
+</div>
+<div class="wave"></div>
+</div>
+<div class="text-center">
+<p class="font-medium">Get 30% off all products</p>
+</div>`,
+// Neon Glow
+`<div class="text-center mb-4">
+<p class="text-sm text-gray-400 mb-1">YOUR CUSTOM OFFER</p>
+<p class="text-xl font-bold mb-4">Special Discount Ends In</p>
+</div>
+<div class="flex justify-center space-x-2 mb-4">
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">23</div>
+<div class="text-xs text-gray-400">HOURS</div>
+</div>
+<div class="flex items-center text-xl">:</div>
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">59</div>
+<div class="text-xs text-gray-400">MINS</div>
+</div>
+<div class="flex items-center text-xl">:</div>
+<div class="bg-gray-800 p-3 rounded-lg w-16 text-center border border-primary shadow-[0_0_10px_rgba(99,102,241,0.7)]">
+<div class="text-xl font-bold text-primary">42</div>
+<div class="text-xs text-gray-400">SECS</div>
+</div>
+</div>
+<div class="text-center">
+<p class="font-medium">Get 30% off all products</p>
+</div>`
+];
+// Select timer style
+selectButtons.forEach((button, index) => {
+button.addEventListener('click', function() {
+// Remove selected class from all cards
+timerCards.forEach(card => {
+card.classList.remove('selected');
+});
+// Add selected class to current card
+timerCards[index].classList.add('selected');
+// Update preview
+previewContainer.innerHTML = previewContents[index];
+});
+});
+// Preview timer style
+previewButtons.forEach((button, index) => {
+button.addEventListener('click', function() {
+// Update preview without selecting
+previewContainer.innerHTML = previewContents[index];
+});
+});
+// Color picker functionality
+const colorPickers = document.querySelectorAll('.color-picker');
+let currentTimerStyle = 0; // Track current selected timer style
+let primaryColor = '#6366f1';
+let secondaryColor = '#8b5cf6';
+colorPickers.forEach((picker, index) => {
+picker.addEventListener('input', function() {
+const isSecondaryColor = index % 2 === 1;
+if (isSecondaryColor) {
+secondaryColor = this.value;
+} else {
+primaryColor = this.value;
+}
+const previewContainer = document.querySelector('.bg-gray-900.p-6.rounded-lg');
+const progressBar = previewContainer.querySelector('.bg-gradient-to-r');
+const wave = previewContainer.querySelector('.wave');
+if (progressBar) {
+progressBar.style.background = `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`;
+}
+if (wave) {
+wave.style.background = `linear-gradient(to bottom, ${primaryColor}cc, ${secondaryColor}99)`;
+}
+// Store colors for Save & Apply
+localStorage.setItem('primaryColor', primaryColor);
+localStorage.setItem('secondaryColor', secondaryColor);
+});
+});
+// Add event listener for Save & Apply button
+document.querySelector('button.bg-primary').addEventListener('click', function() {
+const savedPrimaryColor = localStorage.getItem('primaryColor');
+const savedSecondaryColor = localStorage.getItem('secondaryColor');
+if (savedPrimaryColor && savedSecondaryColor) {
+// Apply saved colors to all relevant elements
+document.documentElement.style.setProperty('--primary-color', savedPrimaryColor);
+document.documentElement.style.setProperty('--secondary-color', savedSecondaryColor);
+}
+});
+});
+</script>
+</body>
+</html>

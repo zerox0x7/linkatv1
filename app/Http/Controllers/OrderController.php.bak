@@ -1,0 +1,329 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class OrderController extends Controller
+{
+    /**
+     * عرض قائمة طلبات المستخدم
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index()
+    {
+        $orders = auth()->user()->orders()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
+        return view('orders.index', compact('orders'));
+    }
+    
+    /**
+     * عرض تفاصيل الطلب
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function show($id)
+    {
+        // Initialize the variables that will be used in the view
+        $digitalCodes = [];
+        $unratedItems = collect();
+        $ratedItems = collect();
+        
+        $order = Order::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->with(['items.orderable', 'payment'])
+            ->firstOrFail();
+            
+        // التحقق مما إذا كان الطلب يحتوي على منتجات رقمية فقط
+        $totalItems = $order->items->count();
+        $hasOnlyDigitalProducts = true;
+        
+        try {
+            foreach ($order->items as $item) {
+                $isDigitalProduct = false;
+                
+                // التحقق إذا كان المنتج رقمي
+                if ($item->orderable_type === 'App\\Models\\Product') {
+                    // تحقق إذا كان نوع المنتج digital_card
+                    $product = DB::table('products')->where('id', $item->orderable_id)->first();
+                    if ($product && $product->type === 'digital_card') {
+                        $isDigitalProduct = true;
+                        
+                        // الحصول على أكواد البطاقات الرقمية المرتبطة بالمنتج
+                        $codes = DB::table('digital_card_codes')
+                            ->where('product_id', $product->id)
+                            ->where('order_id', $order->id)
+                            ->where('user_id', auth()->id())
+                            ->get();
+                            
+                            // إذا لم يتم العثور على أكواد محجوزة، ابحث عن أكواد متاحة
+                            if ($codes->isEmpty() && $order->payment_status === 'paid') {
+                                $codes = DB::table('digital_card_codes')
+                                    ->where('product_id', $product->id)
+                                    ->where(function($query) {
+                                        $query->where('order_id', null)
+                                             ->where('status', 'available');
+                                    })
+                                    ->limit($item->quantity)
+                                    ->get();
+                                    
+                                // حجز الأكواد للمستخدم
+                                foreach ($codes as $code) {
+                                    DB::table('digital_card_codes')
+                                        ->where('id', $code->id)
+                                        ->update([
+                                            'status' => 'used',
+                                            'sold_at' => now(),
+                                            'order_id' => $order->id,
+                                            'user_id' => auth()->id(),
+                                        ]);
+                                }
+                                
+                                // إعادة الحصول على الأكواد بعد التحديث
+                                $codes = DB::table('digital_card_codes')
+                                    ->where('product_id', $product->id)
+                                    ->where('order_id', $order->id)
+                                    ->where('user_id', auth()->id())
+                                    ->get();
+                            }
+                            
+                            if ($codes->isNotEmpty()) {
+                                $digitalCodes[$item->id] = $codes;
+                            }
+                        } else {
+                            $hasOnlyDigitalProducts = false;
+                        }
+                    } elseif ($item->orderable_type === 'App\\Models\\DigitalCard') {
+                        $isDigitalProduct = true;
+                        
+                        if (!$item->orderable) {
+                            continue; // Skip if orderable object is not found
+                        }
+                        
+                        // الحصول على أكواد البطاقات الرقمية
+                        try {
+                            $codes = $item->orderable->codes()
+                                ->where(function($query) use ($order) {
+                                    $query->where('order_id', $order->id)
+                                          ->orWhere(function($q) {
+                                              $q->where('order_id', null)
+                                                ->where('status', 'available');
+                                          });
+                                })
+                                ->limit($item->quantity)
+                                ->get();
+                                
+                            // تحديث حالة الأكواد إذا كان الطلب مدفوع
+                            if ($order->payment_status === 'paid') {
+                                foreach ($codes as $code) {
+                                    // إذا لم يتم تعيين الكود للطلب، قم بتعيينه الآن
+                                    if ($code->order_id === null || $code->status !== 'used') {
+                                        $code->update([
+                                            'status' => 'used',
+                                            'sold_at' => now(),
+                                            'order_id' => $order->id,
+                                            'user_id' => auth()->id(),
+                                        ]);
+                                    }
+                                }
+                                
+                                // إعادة الحصول على الأكواد بعد التحديث
+                                $codes = $item->orderable->codes()
+                                    ->where('order_id', $order->id)
+                                    ->where('user_id', auth()->id())
+                                    ->get();
+                            }
+                            
+                            if ($codes->isNotEmpty()) {
+                                $digitalCodes[$item->id] = $codes;
+                            }
+                        } catch (\Exception $e) {
+                            // Log the error but continue with other items
+                            \Log::error('Error processing digital card for order #' . $order->id . ': ' . $e->getMessage());
+                        }
+                    } else {
+                        $hasOnlyDigitalProducts = false;
+                    }
+                }
+            }
+            
+            // تحديث حالة الطلب تلقائيًا إلى "مكتمل" إذا كان يحتوي فقط على منتجات رقمية وتم الدفع
+            if ($hasOnlyDigitalProducts && $order->payment_status === 'paid' && $order->status !== 'completed') {
+                $order->update([
+                    'status' => 'completed',
+                    'fulfilled_at' => now(),
+                ]);
+                
+                // إعادة تحميل الطلب بعد التحديث
+                $order = $order->fresh(['items.orderable', 'payment']);
+            }
+            
+            // تفريغ سلة التسوق عند عرض الطلب إذا كان مدفوعاً
+            if ($order->payment_status === 'paid') {
+                // تفريغ سلة التسوق للمستخدم المسجل
+                if (auth()->check()) {
+                    $cart = \App\Models\Cart::where('user_id', auth()->id())->first();
+                    if ($cart) {
+                        $cart->items()->delete();
+                        \Log::info('تم تفريغ سلة التسوق عند عرض تفاصيل الطلب المدفوع', ['order_id' => $order->id]);
+                    }
+                }
+                // تفريغ سلة التسوق للزائر (إذا كان يستخدم نفس الجلسة)
+                elseif (session()->has('cart_session_id')) {
+                    $sessionId = session()->get('cart_session_id');
+                    $cart = \App\Models\Cart::where('session_id', $sessionId)->first();
+                    if ($cart) {
+                        $cart->items()->delete();
+                        \Log::info('تم تفريغ سلة التسوق للزائر عند عرض تفاصيل الطلب المدفوع', ['order_id' => $order->id]);
+                    }
+                }
+            }
+            
+            // تحديد العناصر غير المقيمة إذا كان الطلب مكتمل
+            if ($order->status === 'completed') {
+                $unratedItems = $order->items()
+                    ->where('is_rated', false)
+                    ->with('orderable')
+                    ->get();
+                    
+                // تحميل العناصر المقيمة مع تقييماتها
+                $ratedItems = $order->items()
+                    ->where('is_rated', true)
+                    ->with(['orderable', 'review'])
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            // Log the exception but still show the order
+            \Log::error('Error processing order #' . $order->id . ': ' . $e->getMessage());
+        }
+        
+        return view('orders.show', compact('order', 'digitalCodes', 'unratedItems', 'ratedItems'));
+    }
+    
+    /**
+     * إلغاء الطلب
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function cancel($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->firstOrFail();
+            
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+        
+        // إرسال إشعار إلغاء الطلب عبر الواتساب
+        try {
+            $user = auth()->user();
+            if ($user && $user->phone) {
+                $whatsappService = app(\App\Services\WhatsApp\WhatsAppService::class);
+                $whatsappService->sendOrderStatusUpdate($order, 'cancelled');
+                
+                \Illuminate\Support\Facades\Log::info('تم إرسال إشعار إلغاء الطلب عبر واتساب', [
+                    'order_id' => $order->id,
+                    'phone' => $user->phone
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('خطأ أثناء إرسال إشعار واتساب لإلغاء الطلب', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'order_id' => $order->id
+            ]);
+        }
+        
+        // استرجاع المخزون
+        foreach ($order->items as $item) {
+            $product = $item->orderable;
+            
+            if ($item->orderable_type === 'App\\Models\\Product') {
+                // إذا كان منتج رقمي، تحقق من وجود أكواد
+                $productDB = DB::table('products')->where('id', $item->orderable_id)->first();
+                if ($productDB && $productDB->type === 'digital_card') {
+                    // إعادة تعيين حالة أكواد البطاقات الرقمية
+                    DB::table('digital_card_codes')
+                        ->where('product_id', $item->orderable_id)
+                        ->where('order_id', $order->id)
+                        ->update([
+                            'status' => 'available',
+                            'sold_at' => null,
+                            'order_id' => null,
+                            'user_id' => null,
+                        ]);
+                        
+                    // تحديث المخزون
+                    $remainingCodes = DB::table('digital_card_codes')
+                        ->where('product_id', $item->orderable_id)
+                        ->where('order_id', null)
+                        ->where('status', 'available')
+                        ->count();
+                        
+                    DB::table('products')
+                        ->where('id', $item->orderable_id)
+                        ->update([
+                            'stock' => $remainingCodes,
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // منتج عادي
+                    $product->increment('stock', $item->quantity);
+                    $product->decrement('sales_count', $item->quantity);
+                }
+            } elseif ($item->orderable_type === 'App\\Models\\DigitalCard') {
+                // إعادة تعيين حالة أكواد البطاقات الرقمية
+                $product->codes()
+                    ->where('order_id', $order->id)
+                    ->update([
+                        'status' => 'available',
+                        'sold_at' => null,
+                        'order_id' => null,
+                        'user_id' => null,
+                    ]);
+                    
+                $product->increment('stock_quantity', $item->quantity);
+            }
+        }
+        
+        return redirect()->route('orders.show', $order->id)
+            ->with('success', 'تم إلغاء الطلب بنجاح');
+    }
+    
+    /**
+     * تتبع الطلب
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function track(Request $request)
+    {
+        $order = null;
+        
+        if ($request->filled('order_number')) {
+            $order = Order::where('order_number', $request->order_number)
+                ->first();
+                
+            if (!$order) {
+                return view('orders.track')->with('error', 'لم يتم العثور على الطلب');
+            }
+            
+            // التحقق من أن الطلب يخص المستخدم الحالي
+            if (auth()->check() && $order->user_id !== auth()->id()) {
+                return view('orders.track')->with('error', 'ليس لديك صلاحية لعرض هذا الطلب');
+            }
+        }
+        
+        return view('orders.track', compact('order'));
+    }
+} 

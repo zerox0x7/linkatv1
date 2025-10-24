@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تخصيص تذييل الصفحة</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#00e5bb',secondary:'#1e293b'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+background-color: #111827;
+color: white;
+font-family: 'Cairo', sans-serif;
+}
+input[type="range"]::-webkit-slider-thumb {
+-webkit-appearance: none;
+appearance: none;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: #00e5bb;
+cursor: pointer;
+}
+input[type="range"] {
+-webkit-appearance: none;
+appearance: none;
+height: 6px;
+border-radius: 5px;
+background: #1e293b;
+outline: none;
+}
+.switch-input {
+display: none;
+}
+.switch-label {
+position: relative;
+display: inline-block;
+width: 46px;
+height: 24px;
+background-color: #1e293b;
+border-radius: 12px;
+transition: all 0.3s;
+cursor: pointer;
+}
+.switch-label:after {
+content: '';
+position: absolute;
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background-color: white;
+top: 2px;
+right: 2px;
+transition: all 0.3s;
+}
+.switch-input:checked + .switch-label {
+background-color: #00e5bb;
+}
+.switch-input:checked + .switch-label:after {
+right: 24px;
+}
+.color-picker-wrapper {
+position: relative;
+}
+.color-preview {
+width: 24px;
+height: 24px;
+border-radius: 4px;
+cursor: pointer;
+}
+.color-picker {
+opacity: 0;
+position: absolute;
+left: 0;
+top: 0;
+cursor: pointer;
+width: 24px;
+height: 24px;
+}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="flex">
+<!-- Sidebar -->
+<div class="w-64 bg-[#111827] border-l border-[#1e293b] p-4 flex flex-col">
+<div class="flex items-center justify-end mb-8">
+<span class="font-['Pacifico'] text-primary text-2xl">logo</span>
+</div>
+<div class="space-y-1">
+<div class="p-3 rounded flex items-center justify-end gap-2 text-gray-400">
+<span>لوحة التحكم</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-dashboard-line"></i>
+</div>
+</div>
+<div class="p-3 rounded flex items-center justify-end gap-2 text-gray-400">
+<span>إدارة المتجر</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-store-line"></i>
+</div>
+</div>
+<div class="p-3 rounded flex items-center justify-end gap-2 text-gray-400">
+<span>إدارة واجهة المتجر</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-layout-line"></i>
+</div>
+</div>
+<div class="p-3 rounded bg-secondary flex items-center justify-end gap-2 text-white">
+<span>تخصيص متقدم</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-palette-line"></i>
+</div>
+</div>
+<div class="p-3 rounded flex items-center justify-end gap-2 text-primary">
+<span>تذييل الصفحة</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-layout-bottom-line"></i>
+</div>
+</div>
+</div>
+<div class="mt-auto flex items-center justify-end gap-3 p-3">
+<div class="text-sm text-gray-400">
+<div>مدير المتجر</div>
+<div>test33</div>
+</div>
+<div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+<i class="ri-user-line text-gray-400"></i>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<div class="flex-1 p-6">
+<div class="flex justify-between items-center mb-6">
+<div class="relative w-64">
+<input type="text" placeholder="بحث..." class="w-full bg-[#1e293b] border-none outline-none rounded p-2 pr-10 text-white">
+<div class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center">
+<i class="ri-search-line text-gray-400"></i>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-[#1e293b] rounded flex items-center justify-center">
+<i class="ri-notification-line text-gray-400"></i>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-arrow-down-s-line text-gray-400"></i>
+</div>
+<span>AR</span>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<h1 class="text-2xl font-bold">تخصيص تذييل الصفحة</h1>
+<p class="text-gray-400 mt-1">قم بتخصيص وتعديل محتوى تذييل الصفحة لمتجرك</p>
+</div>
+<div class="bg-[#1e293b] rounded-lg p-5 mb-6">
+<div class="flex items-center justify-between mb-4">
+<button class="bg-primary text-[#111827] px-4 py-2 rounded-button whitespace-nowrap font-medium">
+حفظ التغييرات
+</button>
+<div class="flex items-center gap-2">
+<i class="ri-information-line text-gray-400"></i>
+<h2 class="text-lg font-bold">معلومات تذييل الصفحة</h2>
+</div>
+</div>
+<!-- Logo Settings -->
+<div class="border-b border-[#2d3748] pb-6 mb-6">
+<h3 class="text-md font-bold mb-4 text-right">إعدادات الشعار</h3>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<input type="range" min="50" max="200" value="100" class="w-40" id="logoSizeRange">
+<span id="logoSizeValue" class="text-sm text-gray-400">100%</span>
+</div>
+<label class="text-sm">حجم الشعار</label>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="flex bg-[#111827] rounded-full p-1">
+<button class="px-3 py-1 rounded-full text-sm" id="logoLeft">يسار</button>
+<button class="px-3 py-1 rounded-full text-sm bg-primary text-[#111827]" id="logoCenter">وسط</button>
+<button class="px-3 py-1 rounded-full text-sm" id="logoRight">يمين</button>
+</div>
+</div>
+<label class="text-sm">موضع الشعار</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<input type="checkbox" id="logoVisibility" class="switch-input" checked>
+<label for="logoVisibility" class="switch-label"></label>
+</div>
+<label class="text-sm">إظهار الشعار</label>
+</div>
+</div>
+<!-- Footer Links -->
+<div class="border-b border-[#2d3748] pb-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<button class="bg-[#111827] text-primary border border-primary px-3 py-1 rounded-button whitespace-nowrap text-sm">
+<i class="ri-add-line ml-1"></i>إضافة رابط
+</button>
+<h3 class="text-md font-bold">روابط التذييل</h3>
+</div>
+<div class="bg-[#111827] rounded-lg p-4 mb-4">
+<div class="flex items-center justify-between mb-3">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</div>
+<h4 class="text-sm font-bold">الرابط 1</h4>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-3">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">نص الرابط</label>
+<input type="text" value="من نحن" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">عنوان URL</label>
+<input type="text" value="/about" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">أيقونة</label>
+<div class="relative">
+<div class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm flex items-center justify-between cursor-pointer">
+<i class="ri-arrow-down-s-line"></i>
+<div class="flex items-center gap-2">
+<span>معلومات</span>
+<i class="ri-information-line"></i>
+</div>
+</div>
+</div>
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">لون الرابط</label>
+<div class="flex items-center gap-2">
+<div class="color-picker-wrapper">
+<div class="color-preview bg-white"></div>
+<input type="color" value="#FFFFFF" class="color-picker">
+</div>
+<input type="text" value="#FFFFFF" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+</div>
+</div>
+<div class="bg-[#111827] rounded-lg p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</div>
+<h4 class="text-sm font-bold">الرابط 2</h4>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-3">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">نص الرابط</label>
+<input type="text" value="اتصل بنا" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">عنوان URL</label>
+<input type="text" value="/contact" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">أيقونة</label>
+<div class="relative">
+<div class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm flex items-center justify-between cursor-pointer">
+<i class="ri-arrow-down-s-line"></i>
+<div class="flex items-center gap-2">
+<span>هاتف</span>
+<i class="ri-phone-line"></i>
+</div>
+</div>
+</div>
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">لون الرابط</label>
+<div class="flex items-center gap-2">
+<div class="color-picker-wrapper">
+<div class="color-preview bg-primary"></div>
+<input type="color" value="#00e5bb" class="color-picker">
+</div>
+<input type="text" value="#00e5bb" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Components -->
+<div class="border-b border-[#2d3748] pb-6 mb-6">
+<h3 class="text-md font-bold mb-4 text-right">مكونات التذييل</h3>
+<div class="space-y-4">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div>
+<input type="checkbox" id="socialLinks" class="switch-input" checked>
+<label for="socialLinks" class="switch-label"></label>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm">روابط التواصل الاجتماعي</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-share-line"></i>
+</div>
+</div>
+</div>
+<div class="bg-[#111827] rounded-lg p-4 mb-4">
+<div class="flex items-center justify-between mb-3">
+<button class="bg-[#1e293b] text-primary border border-primary px-3 py-1 rounded-button whitespace-nowrap text-sm">
+<i class="ri-add-line ml-1"></i>إضافة رابط
+</button>
+<h4 class="text-sm font-bold">روابط التواصل الاجتماعي</h4>
+</div>
+<div class="space-y-3">
+<div class="bg-[#1e293b] rounded-lg p-3">
+<div class="flex items-center justify-between mb-3">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">تويتر</span>
+<div class="w-8 h-8 bg-[#111827] rounded-full flex items-center justify-center">
+<i class="ri-twitter-x-fill"></i>
+</div>
+</div>
+</div>
+<input type="text" value="https://twitter.com/example" class="w-full bg-[#111827] border-none rounded p-2 text-white text-sm">
+</div>
+<div class="bg-[#1e293b] rounded-lg p-3">
+<div class="flex items-center justify-between mb-3">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">انستغرام</span>
+<div class="w-8 h-8 bg-[#111827] rounded-full flex items-center justify-center">
+<i class="ri-instagram-fill"></i>
+</div>
+</div>
+</div>
+<input type="text" value="https://instagram.com/example" class="w-full bg-[#111827] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<input type="checkbox" id="copyrightInfo" class="switch-input" checked>
+<label for="copyrightInfo" class="switch-label"></label>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm">معلومات حقوق النشر</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-copyright-line"></i>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<input type="checkbox" id="contactInfo" class="switch-input" checked>
+<label for="contactInfo" class="switch-label"></label>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm">معلومات الاتصال</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-contacts-line"></i>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<input type="checkbox" id="paymentIcons" class="switch-input" checked>
+<label for="paymentIcons" class="switch-label"></label>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm">أيقونات طرق الدفع</span>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-bank-card-line"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Advanced Settings -->
+<div>
+<h3 class="text-md font-bold mb-4 text-right">إعدادات متقدمة</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex bg-[#111827] rounded-full p-1">
+<button class="px-3 py-1 rounded-full text-sm" id="col1">1</button>
+<button class="px-3 py-1 rounded-full text-sm" id="col2">2</button>
+<button class="px-3 py-1 rounded-full text-sm bg-primary text-[#111827]" id="col3">3</button>
+<button class="px-3 py-1 rounded-full text-sm" id="col4">4</button>
+</div>
+</div>
+<label class="text-sm">عدد الأعمدة</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 w-64">
+<div class="color-picker-wrapper">
+<div class="color-preview bg-[#111827]"></div>
+<input type="color" value="#111827" class="color-picker">
+</div>
+<input type="text" value="#111827" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+<label class="text-sm">لون خلفية التذييل</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3 w-64">
+<input type="range" min="0" max="100" value="40" class="w-40" id="paddingRange">
+<span id="paddingValue" class="text-sm text-gray-400">40px</span>
+</div>
+<label class="text-sm">المساحة الداخلية</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex bg-[#111827] rounded-full p-1">
+<button class="px-3 py-1 rounded-full text-sm" id="mobileView">
+<i class="ri-smartphone-line"></i>
+</button>
+<button class="px-3 py-1 rounded-full text-sm" id="tabletView">
+<i class="ri-tablet-line"></i>
+</button>
+<button class="px-3 py-1 rounded-full text-sm bg-primary text-[#111827]" id="desktopView">
+<i class="ri-computer-line"></i>
+</button>
+</div>
+</div>
+<label class="text-sm">معاينة تجاوبية</label>
+</div>
+<div>
+<label class="text-sm block mb-2 text-right">CSS مخصص</label>
+<textarea class="w-full bg-[#111827] border-none rounded p-3 text-gray-300 text-sm font-mono h-24 resize-none">.footer-custom {
+/* أضف أكواد CSS المخصصة هنا */
+font-weight: 500;
+letter-spacing: 0.5px;
+}</textarea>
+</div>
+</div>
+</div>
+</div>
+<!-- Preview Section -->
+<div class="bg-[#1e293b] rounded-lg p-5">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<button class="bg-[#111827] text-gray-400 px-4 py-2 rounded-button whitespace-nowrap text-sm">
+إعادة تعيين
+</button>
+<div class="flex bg-[#111827] rounded-full p-1">
+<button id="previewMobile" class="px-4 py-2 rounded-full text-sm flex items-center gap-2">
+<i class="ri-smartphone-line"></i>
+<span>جوال</span>
+</button>
+<button id="previewDesktop" class="px-4 py-2 rounded-full text-sm flex items-center gap-2 bg-primary text-[#111827]">
+<i class="ri-computer-line"></i>
+<span>حاسوب</span>
+</button>
+</div>
+</div>
+<h2 class="text-lg font-bold">معاينة التذييل</h2>
+</div>
+<div id="previewContainer" class="bg-[#111827] rounded-lg h-[480px] flex items-center justify-center transition-all duration-300 overflow-hidden">
+<div id="previewContent" class="w-full max-w-4xl transition-all duration-300 relative">
+<div class="grid grid-cols-3 gap-8 mb-6">
+<div class="text-center">
+<h3 class="text-primary font-bold mb-3">معلومات الاتصال</h3>
+<ul class="space-y-2 text-sm text-gray-300">
+<li class="flex items-center justify-center gap-2">
+<span>info@example.com</span>
+<i class="ri-mail-line"></i>
+</li>
+<li class="flex items-center justify-center gap-2">
+<span>+966 12 345 6789</span>
+<i class="ri-phone-line"></i>
+</li>
+<li class="flex items-center justify-center gap-2">
+<span>الرياض، المملكة العربية السعودية</span>
+<i class="ri-map-pin-line"></i>
+</li>
+</ul>
+</div>
+<div class="text-center">
+<div class="font-['Pacifico'] text-primary text-3xl mb-3">logo</div>
+<div class="flex items-center justify-center gap-3 mb-3">
+<a href="#" class="w-8 h-8 bg-[#1e293b] rounded-full flex items-center justify-center">
+<i class="ri-twitter-x-line"></i>
+</a>
+<a href="#" class="w-8 h-8 bg-[#1e293b] rounded-full flex items-center justify-center">
+<i class="ri-instagram-line"></i>
+</a>
+<a href="#" class="w-8 h-8 bg-[#1e293b] rounded-full flex items-center justify-center">
+<i class="ri-facebook-line"></i>
+</a>
+<a href="#" class="w-8 h-8 bg-[#1e293b] rounded-full flex items-center justify-center">
+<i class="ri-snapchat-line"></i>
+</a>
+</div>
+<div class="flex items-center justify-center gap-2">
+<i class="ri-visa-fill text-2xl"></i>
+<i class="ri-mastercard-fill text-2xl"></i>
+<i class="ri-paypal-fill text-2xl"></i>
+<i class="ri-apple-fill text-2xl"></i>
+</div>
+</div>
+<div class="text-center">
+<h3 class="text-primary font-bold mb-3">روابط سريعة</h3>
+<ul class="space-y-2 text-sm text-gray-300">
+<li>
+<a href="#" class="hover:text-primary flex items-center justify-center gap-2">
+<span>من نحن</span>
+<i class="ri-information-line"></i>
+</a>
+</li>
+<li>
+<a href="#" class="text-primary flex items-center justify-center gap-2">
+<span>اتصل بنا</span>
+<i class="ri-phone-line"></i>
+</a>
+</li>
+<li>
+<a href="#" class="hover:text-primary flex items-center justify-center gap-2">
+<span>الشروط والأحكام</span>
+<i class="ri-file-list-line"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+<div class="text-center text-sm text-gray-400 pt-4 border-t border-[#2d3748]">
+© 2025 متجر الإلكترونيات. جميع الحقوق محفوظة.
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script id="logoSizeScript">
+document.addEventListener('DOMContentLoaded', function() {
+const logoSizeRange = document.getElementById('logoSizeRange');
+const logoSizeValue = document.getElementById('logoSizeValue');
+logoSizeRange.addEventListener('input', function() {
+logoSizeValue.textContent = this.value + '%';
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="paddingScript">
+document.addEventListener('DOMContentLoaded', function() {
+const paddingRange = document.getElementById('paddingRange');
+const paddingValue = document.getElementById('paddingValue');
+paddingRange.addEventListener('input', function() {
+paddingValue.textContent = this.value + 'px';
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="logoPositionScript">
+document.addEventListener('DOMContentLoaded', function() {
+const logoLeft = document.getElementById('logoLeft');
+const logoCenter = document.getElementById('logoCenter');
+const logoRight = document.getElementById('logoRight');
+logoLeft.addEventListener('click', function() {
+logoLeft.classList.add('bg-primary', 'text-[#111827]');
+logoCenter.classList.remove('bg-primary', 'text-[#111827]');
+logoRight.classList.remove('bg-primary', 'text-[#111827]');
+});
+logoCenter.addEventListener('click', function() {
+logoCenter.classList.add('bg-primary', 'text-[#111827]');
+logoLeft.classList.remove('bg-primary', 'text-[#111827]');
+logoRight.classList.remove('bg-primary', 'text-[#111827]');
+});
+logoRight.addEventListener('click', function() {
+logoRight.classList.add('bg-primary', 'text-[#111827]');
+logoLeft.classList.remove('bg-primary', 'text-[#111827]');
+logoCenter.classList.remove('bg-primary', 'text-[#111827]');
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="columnsScript">
+document.addEventListener('DOMContentLoaded', function() {
+const col1 = document.getElementById('col1');
+const col2 = document.getElementById('col2');
+const col3 = document.getElementById('col3');
+const col4 = document.getElementById('col4');
+col1.addEventListener('click', function() {
+col1.classList.add('bg-primary', 'text-[#111827]');
+col2.classList.remove('bg-primary', 'text-[#111827]');
+col3.classList.remove('bg-primary', 'text-[#111827]');
+col4.classList.remove('bg-primary', 'text-[#111827]');
+});
+col2.addEventListener('click', function() {
+col2.classList.add('bg-primary', 'text-[#111827]');
+col1.classList.remove('bg-primary', 'text-[#111827]');
+col3.classList.remove('bg-primary', 'text-[#111827]');
+col4.classList.remove('bg-primary', 'text-[#111827]');
+});
+col3.addEventListener('click', function() {
+col3.classList.add('bg-primary', 'text-[#111827]');
+col1.classList.remove('bg-primary', 'text-[#111827]');
+col2.classList.remove('bg-primary', 'text-[#111827]');
+col4.classList.remove('bg-primary', 'text-[#111827]');
+});
+col4.addEventListener('click', function() {
+col4.classList.add('bg-primary', 'text-[#111827]');
+col1.classList.remove('bg-primary', 'text-[#111827]');
+col2.classList.remove('bg-primary', 'text-[#111827]');
+col3.classList.remove('bg-primary', 'text-[#111827]');
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="previewScript">
+document.addEventListener('DOMContentLoaded', function() {
+const previewMobile = document.getElementById('previewMobile');
+const previewDesktop = document.getElementById('previewDesktop');
+const previewContainer = document.getElementById('previewContainer');
+const previewContent = document.getElementById('previewContent');
+function setMobileView() {
+previewMobile.classList.add('bg-primary', 'text-[#111827]');
+previewDesktop.classList.remove('bg-primary', 'text-[#111827]');
+previewContent.style.maxWidth = '375px';
+previewContent.style.height = '667px';
+previewContent.style.borderRadius = '32px';
+previewContent.style.backgroundColor = '#111827';
+previewContent.style.padding = '1rem';
+previewContent.style.transform = 'scale(0.7)';
+previewContent.style.boxShadow = '0 0 0 2px #2d3748';
+const gridContent = previewContent.querySelector('.grid');
+if(gridContent) {
+gridContent.classList.remove('grid-cols-3');
+gridContent.classList.add('grid-cols-1', 'gap-6');
+}
+}
+function setDesktopView() {
+previewDesktop.classList.add('bg-primary', 'text-[#111827]');
+previewMobile.classList.remove('bg-primary', 'text-[#111827]');
+previewContent.style.maxWidth = '100%';
+previewContent.style.height = 'auto';
+previewContent.style.borderRadius = '0';
+previewContent.style.backgroundColor = 'transparent';
+previewContent.style.padding = '1.5rem';
+previewContent.style.transform = 'scale(1)';
+previewContent.style.boxShadow = 'none';
+const gridContent = previewContent.querySelector('.grid');
+if(gridContent) {
+gridContent.classList.remove('grid-cols-1', 'gap-6');
+gridContent.classList.add('grid-cols-3', 'gap-8');
+}
+}
+previewMobile.addEventListener('click', setMobileView);
+previewDesktop.addEventListener('click', setDesktopView);
+setDesktopView();
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="colorPickerScript">
+document.addEventListener('DOMContentLoaded', function() {
+const colorPickers = document.querySelectorAll('.color-picker');
+colorPickers.forEach(picker => {
+const preview = picker.previousElementSibling;
+picker.addEventListener('input', function() {
+preview.style.backgroundColor = this.value;
+const inputField = picker.parentElement.nextElementSibling;
+if (inputField) {
+inputField.value = this.value;
+}
+});
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+<script id="addLinkScript">
+document.addEventListener('DOMContentLoaded', function() {
+const addLinkButton = document.querySelector('button:has(.ri-add-line):not(:has(.border-primary))');
+const addSocialButton = document.querySelector('button:has(.ri-add-line):has(.border-primary)');
+const socialIcons = [
+  { name: 'تويتر', icon: 'ri-twitter-x-fill' },
+  { name: 'انستغرام', icon: 'ri-instagram-fill' },
+  { name: 'فيسبوك', icon: 'ri-facebook-fill' },
+  { name: 'سناب شات', icon: 'ri-snapchat-fill' },
+  { name: 'يوتيوب', icon: 'ri-youtube-fill' },
+  { name: 'تيك توك', icon: 'ri-tiktok-fill' },
+  { name: 'لينكد إن', icon: 'ri-linkedin-fill' },
+  { name: 'واتساب', icon: 'ri-whatsapp-fill' }
+];
+addSocialButton.addEventListener('click', function() {
+  const socialLinksContainer = this.closest('.bg-[#111827]').querySelector('.space-y-3');
+  const newSocialLink = document.createElement('div');
+  newSocialLink.className = 'bg-[#1e293b] rounded-lg p-3';
+  
+  const randomIcon = socialIcons[Math.floor(Math.random() * socialIcons.length)];
+  
+  newSocialLink.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+        <i class="ri-delete-bin-line"></i>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium">${randomIcon.name}</span>
+        <div class="w-8 h-8 bg-[#111827] rounded-full flex items-center justify-center">
+          <i class="${randomIcon.icon}"></i>
+        </div>
+      </div>
+    </div>
+    <input type="text" placeholder="أدخل رابط ${randomIcon.name}" class="w-full bg-[#111827] border-none rounded p-2 text-white text-sm">
+  `;
+  socialLinksContainer.appendChild(newSocialLink);
+  const deleteButton = newSocialLink.querySelector('.ri-delete-bin-line').parentElement;
+  deleteButton.addEventListener('click', function() {
+    newSocialLink.remove();
+  });
+});
+let linkCount = 2;
+function initIconSelector(container) {
+const iconSelector = container.querySelector('#iconSelector');
+const iconDropdown = container.querySelector('#iconDropdown');
+const iconOptions = container.querySelectorAll('.icon-option');
+const selectedIcon = container.querySelector('.selected-icon');
+const iconText = container.querySelector('.icon-text');
+iconSelector.addEventListener('click', function(e) {
+e.stopPropagation();
+iconDropdown.classList.toggle('hidden');
+});
+iconOptions.forEach(option => {
+option.addEventListener('click', function(e) {
+e.stopPropagation();
+const iconClass = this.dataset.icon;
+const iconName = this.dataset.name;
+selectedIcon.className = `selected-icon ${iconClass}`;
+iconText.textContent = iconName;
+iconDropdown.classList.add('hidden');
+});
+});
+document.addEventListener('click', function(e) {
+if (!iconSelector.contains(e.target)) {
+iconDropdown.classList.add('hidden');
+}
+});
+}
+function initColorPicker(container) {
+const picker = container.querySelector('.color-picker');
+const preview = picker.previousElementSibling;
+picker.addEventListener('input', function() {
+preview.style.backgroundColor = this.value;
+const inputField = picker.parentElement.nextElementSibling;
+if (inputField) {
+inputField.value = this.value;
+}
+});
+}
+addLinkButton.addEventListener('click', function() {
+linkCount++;
+const newLinkForm = document.createElement('div');
+newLinkForm.className = 'bg-[#111827] rounded-lg p-4 mt-4';
+newLinkForm.innerHTML = `
+<div class="flex items-center justify-between mb-3">
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</div>
+<h4 class="text-sm font-bold">الرابط ${linkCount}</h4>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-3">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">نص الرابط</label>
+<input type="text" placeholder="أدخل نص الرابط" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">عنوان URL</label>
+<input type="text" placeholder="أدخل عنوان URL" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">أيقونة</label>
+<div class="relative">
+<div id="iconSelector" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm flex items-center justify-between cursor-pointer">
+<i class="ri-arrow-down-s-line"></i>
+<div class="flex items-center gap-2">
+<span class="icon-text">اختر أيقونة</span>
+<i class="selected-icon ri-link-line"></i>
+</div>
+</div>
+<div id="iconDropdown" class="hidden absolute top-full right-0 w-full mt-1 bg-[#1e293b] border border-[#2d3748] rounded-lg p-3 z-50">
+<div class="grid grid-cols-4 gap-3">
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-information-line" data-name="معلومات">
+<i class="ri-information-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-phone-line" data-name="هاتف">
+<i class="ri-phone-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-mail-line" data-name="بريد">
+<i class="ri-mail-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-map-pin-line" data-name="موقع">
+<i class="ri-map-pin-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-user-line" data-name="مستخدم">
+<i class="ri-user-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-link-line" data-name="رابط">
+<i class="ri-link-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-file-list-line" data-name="ملف">
+<i class="ri-file-list-line text-lg"></i>
+</div>
+<div class="icon-option w-10 h-10 rounded flex items-center justify-center hover:bg-[#111827] cursor-pointer" data-icon="ri-home-line" data-name="منزل">
+<i class="ri-home-line text-lg"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div>
+<label class="text-xs text-gray-400 block mb-1 text-right">لون الرابط</label>
+<div class="flex items-center gap-2">
+<div class="color-picker-wrapper">
+<div class="color-preview bg-white"></div>
+<input type="color" value="#FFFFFF" class="color-picker">
+</div>
+<input type="text" value="#FFFFFF" class="w-full bg-[#1e293b] border-none rounded p-2 text-white text-sm">
+</div>
+</div>
+</div>
+`;
+const linksContainer = addLinkButton.closest('div').parentElement;
+linksContainer.insertBefore(newLinkForm, addLinkButton.closest('div').nextSibling);
+initColorPicker(newLinkForm);
+initIconSelector(newLinkForm);
+const deleteButton = newLinkForm.querySelector('.ri-delete-bin-line').parentElement;
+deleteButton.addEventListener('click', function() {
+newLinkForm.remove();
+});
+});
+const existingIconSelectors = document.querySelectorAll('.relative:has(#iconSelector)');
+existingIconSelectors.forEach(container => {
+initIconSelector(container);
+});
+});
+</script>
+</body>
+</html>

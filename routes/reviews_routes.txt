@@ -1,0 +1,3 @@
+    // إدارة التقييمات
+    Route::resource('reviews', ReviewController::class)->except(['create', 'store']);
+    Route::patch('reviews/{review}/toggle-approval', [ReviewController::class, 'toggleApproval'])->name('reviews.toggle-approval'); 

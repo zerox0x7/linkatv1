@@ -1,0 +1,61 @@
+/* ملف الألوان المخصصة */
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #9C27B0;
+}
+
+/* الألوان الأساسية للتدرجات */
+.from-primary {
+    --tw-gradient-from: var(--primary-color);
+    --tw-gradient-to: rgba(33, 150, 243, 0);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-secondary {
+    --tw-gradient-to: var(--secondary-color);
+}
+
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color);
+}
+
+/* تصحيح لمشكلة الألوان في التدرجات */
+.bg-gradient-to-r.from-primary.to-secondary {
+    background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+}
+
+/* تأثيرات إضافية */
+.text-primary {
+    color: var(--primary-color);
+}
+
+.text-secondary {
+    color: var(--secondary-color);
+}
+
+.border-primary {
+    border-color: var(--primary-color);
+}
+
+.border-secondary {
+    border-color: var(--secondary-color);
+}
+
+/* تخصيص النمط الموحد للأزرار */
+.custom-button {
+    background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+}
+
+.custom-button:hover {
+    opacity: 0.9;
+} 

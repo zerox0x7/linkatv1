@@ -1,0 +1,195 @@
+<div>
+    <div class="flex relative top-0 justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Coupon Settings: {{ $coupon->code }}</h2>
+        <button wire:click="$dispatch('couponSettingsUpdated')" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    @if (session()->has('message'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ session('message') }}
+    </div>
+    @endif
+
+    @if (session()->has('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Categories Section -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Categories</h3>
+
+            <!-- Search Categories -->
+            <div class="mb-4">
+                <input type="text" wire:model.live="searchCategories" placeholder="Search categories..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Selected Categories -->
+            @if(count($selectedCategories) > 0)
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Categories:</h4>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($availableCategories->whereIn('id', $selectedCategories) as $category)
+                    <span
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ $category->name }}
+                        <button wire:click="removeCategory({{ $category->id }})"
+                            class="ml-1 text-blue-600 hover:text-blue-800">
+                            ×
+                        </button>
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Available Categories -->
+            <div class="border rounded-md max-h-64 overflow-y-auto">
+                @forelse($availableCategories as $category)
+                <div class="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50">
+                    <span class="text-sm">{{ $category->name }}</span>
+                    <button wire:click="toggleCategory({{ $category->id }})"
+                        class="px-3 py-1 text-xs rounded {{ in_array($category->id, $selectedCategories) ? 'bg-red-500 text-white' : 'bg-green-500 text-white' }}">
+                        {{ in_array($category->id, $selectedCategories) ? 'Remove' : 'Add' }}
+                    </button>
+                </div>
+                @empty
+                <div class="p-4 text-center text-gray-500">No categories found</div>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Products</h3>
+
+            <!-- Search Products -->
+            <div class="mb-4">
+                <input type="text" wire:model.live="searchProducts" placeholder="Search products..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Selected Products -->
+            @if(count($selectedProducts) > 0)
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Products:</h4>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($availableProducts->whereIn('id', $selectedProducts) as $product)
+                    <span
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ $product->name }}
+                        <button wire:click="removeProduct({{ $product->id }})"
+                            class="ml-1 text-green-600 hover:text-green-800">
+                            ×
+                        </button>
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Available Products -->
+            <div class="border rounded-md max-h-64 overflow-y-auto">
+                @forelse($availableProducts as $product)
+                <div class="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50">
+                    <span class="text-sm">{{ $product->name }}</span>
+                    <button wire:click="toggleProduct({{ $product->id }})"
+                        class="px-3 py-1 text-xs rounded {{ in_array($product->id, $selectedProducts) ? 'bg-red-500 text-white' : 'bg-green-500 text-white' }}">
+                        {{ in_array($product->id, $selectedProducts) ? 'Remove' : 'Add' }}
+                    </button>
+                </div>
+                @empty
+                <div class="p-4 text-center text-gray-500">No products found</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="mt-8 flex justify-end">
+        <button wire:click="saveCouponSettings"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors">
+            Save Settings
+        </button>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- <div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach($coupons as $coupon)
+            <div class="bg-white rounded-lg shadow-md p-6 border">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $coupon->code }}</h3>
+                        <p class="text-sm text-gray-600">{{ $coupon->description ?? 'No description' }}</p>
+                    </div>
+                    <button 
+                        wire:click="openCouponSettings({{ $coupon->id }})"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                    >
+                        Settings
+                    </button>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Type:</span>
+                        <span class="font-medium">{{ ucfirst($coupon->type) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Value:</span>
+                        <span class="font-medium">
+                            {{ $coupon->type === 'percentage' ? $coupon->value . '%' : '$' . $coupon->value }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="font-medium {{ $coupon->is_active ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $coupon->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t">
+                    <div class="text-xs text-gray-500">
+                        <p>Categories: {{ $coupon->categories->count() }}</p>
+                        <p>Products: {{ $coupon->products->count() }}</p>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="mt-6">
+        {{ $coupons->links() }}
+    </div>
+
+    @if($showCouponSettings && $selectedCoupon)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click="closeCouponSettings">
+            <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto" wire:click.stop>
+                <livewire:coupon-settings :coupon="$selectedCoupon" :key="$selectedCoupon->id" />
+            </div>
+        </div>
+    @endif
+</div> --}}

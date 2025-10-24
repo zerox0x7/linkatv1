@@ -1,0 +1,308 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DigitalCardController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CustomOrderController;
+use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CouponController;
+use App\Http\Controllers\ReviewController;
+use Illuminate\Support\Facades\DB;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+// الصفحة الرئيسية
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// مسار التاغات المختصر
+Route::get('/tag/{product}/{tag}', [ProductController::class, 'productByTag'])->name('products.tag');
+
+// مسارات المنتجات/الحسابات
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/featured', [ProductController::class, 'featured'])->name('products.featured');
+Route::get('/products/best-sellers', [ProductController::class, 'bestSellers'])->name('products.best-sellers');
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+// أدوات النظام (مؤقتة)
+Route::get('/system/generate-share-slugs', [ProductController::class, 'generateShareSlugs']);
+
+// مسارات البطاقات الرقمية
+Route::get('/digital-cards', [DigitalCardController::class, 'index'])->name('digital-cards.index');
+Route::get('/digital-cards/featured', [DigitalCardController::class, 'featured'])->name('digital-cards.featured');
+Route::get('/digital-cards/{slug}', [DigitalCardController::class, 'show'])->name('digital-cards.show');
+
+// سلة التسوق
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
+Route::put('/cart/{id}', [CartController::class, 'updateItem'])->name('cart.update');
+Route::delete('/cart/{id}', [CartController::class, 'removeItem'])->name('cart.remove');
+Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+
+// كوبونات الخصم
+Route::post('/cart/coupon', [CouponController::class, 'applyCoupon'])->name('cart.apply-coupon');
+Route::post('/cart/coupon/remove', [CouponController::class, 'removeCoupon'])->name('cart.remove-coupon');
+Route::post('/coupon/check', [CouponController::class, 'checkCoupon'])->name('coupon.check');
+
+// مسارات تتبع الطلبات
+Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
+
+// مسار تقييم المنتجات الجديد للاختبار (بدون تحقق)
+Route::post('/test-product-rate', function (Illuminate\Http\Request $request) {
+    try {
+        // التحقق من البيانات
+        $request->validate([
+            'product_id' => 'required|numeric',
+            'product_type' => 'required|string',
+            'order_item_id' => 'required|numeric',
+            'rating' => 'required|numeric|min:1|max:5',
+            'review' => 'nullable|string|max:500',
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'تم استلام التقييم بنجاح (وضع الاختبار)',
+            'data' => $request->all()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'حدث خطأ: ' . $e->getMessage(),
+        ], 422);
+    }
+})->name('test.product.rate')->middleware('web');
+
+// مسارات تحتاج تسجيل دخول
+Route::middleware(['auth'])->group(function () {
+    // ملف الحساب الشخصي
+    Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [UserProfileController::class, 'updatePassword'])->name('profile.update-password');
+    
+    // الطلبات
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    
+    // الطلبات المخصصة
+    Route::get('/custom-orders', [CustomOrderController::class, 'index'])->name('custom-orders.index');
+    Route::get('/custom-orders/create', [CustomOrderController::class, 'create'])->name('custom-orders.create');
+    Route::post('/custom-orders', [CustomOrderController::class, 'store'])->name('custom-orders.store');
+    Route::get('/custom-orders/{id}', [CustomOrderController::class, 'show'])->name('custom-orders.show');
+    Route::post('/custom-orders/{id}/message', [CustomOrderController::class, 'sendMessage'])->name('custom-orders.message');
+    
+    // إتمام الطلب
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+
+    // صفحات الدفع
+    Route::get('/payment/credit-card/{order}', [PaymentController::class, 'creditCard'])->name('payment.creditcard');
+    Route::get('/payment/bank-transfer/{order}', [PaymentController::class, 'bankTransfer'])->name('payment.bank_transfer');
+    Route::post('/payment/complete/{order}', [PaymentController::class, 'complete'])->name('payment.complete');
+    
+    // كليك باي وبوابات الدفع
+    Route::get('/payment/clickpay/{order}', [PaymentController::class, 'clickpay'])->name('payment.clickpay');
+
+    // التقييمات
+    Route::post('/product/rate', [ReviewController::class, 'store'])->name('product.rate');
+});
+
+// مسارات استجابة بوابات الدفع - بدون تسجيل دخول
+Route::prefix('payment/callback')->name('payment.callback.')->group(function () {
+    Route::get('success', [PaymentController::class, 'clickpaySuccess'])->name('success');
+    Route::get('cancel', [PaymentController::class, 'clickpayCancel'])->name('cancel');
+});
+
+// مسارات ويب هوك بوابات الدفع
+Route::prefix('payment/webhook')->name('payment.webhook.')->group(function () {
+    Route::post('clickpay', [PaymentController::class, 'clickpayWebhook'])
+        ->name('clickpay')
+        ->withoutMiddleware(['csrf']);
+});
+
+// الصفحات العامة
+Route::get('/page/{slug}', [PageController::class, 'show'])->name('page.show');
+
+Route::get('/about', function () {
+    return redirect()->route('page.show', 'about');
+})->name('about');
+
+Route::get('/contact', function () {
+    return redirect()->route('page.show', 'contact');
+})->name('contact');
+
+Route::get('/privacy-policy', function () {
+    return redirect()->route('page.show', 'privacy');
+})->name('privacy-policy');
+
+Route::get('/terms', function () {
+    return redirect()->route('page.show', 'terms');
+})->name('terms');
+
+// مسارات المصادقة (تحل محل Auth::routes())
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
+// مسارات استعادة كلمة المرور
+Route::get('/password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
+// مسار اختبار لتحديث كليك باي
+Route::get('/test-clickpay-update', function () {
+    return view('test-clickpay');
+})->name('test.clickpay');
+
+Route::post('/test-clickpay-update', function (Illuminate\Http\Request $request) {
+    try {
+        $paymentMethod = DB::table('payment_methods')->where('code', 'clickpay')->first();
+        
+        if (!$paymentMethod) {
+            return "بوابة كليك باي غير موجودة";
+        }
+        
+        $description = $request->input('description');
+        $profile_id = $request->input('profile_id');
+        $server_key = $request->input('server_key');
+        $is_active = $request->has('is_active') ? 1 : 0;
+        
+        // تحضير بيانات الاعتماد
+        $credentials = [
+            'profile_id' => $profile_id,
+            'server_key' => $server_key
+        ];
+        
+        // تحديث البيانات بشكل مباشر
+        $updated = DB::table('payment_methods')
+            ->where('id', $paymentMethod->id)
+            ->update([
+                'description' => $description,
+                'is_active' => $is_active,
+                'credentials' => json_encode($credentials),
+                'updated_at' => now()
+            ]);
+        
+        return "تم التحديث بنجاح: " . ($updated ? 'نعم' : 'لا') . "<br>البيانات المُحدثة:<br>الوصف: $description<br>المعرف: $profile_id<br>المفتاح: $server_key<br>مفعل: " . ($is_active ? 'نعم' : 'لا');
+        
+    } catch (\Exception $e) {
+        return "حدث خطأ: " . $e->getMessage();
+    }
+})->name('test.clickpay.update');
+
+// مسار لعرض آخر سجلات بوابة الدفع
+Route::get('/view-payment-logs', function () {
+    try {
+        $logFile = storage_path('logs/laravel.log');
+        $logs = file_exists($logFile) ? file_get_contents($logFile) : '';
+        
+        // البحث عن سجلات بوابة الدفع
+        $paymentLogs = [];
+        $pattern = '/\[.*?\] local\.INFO: .*?(كليك باي|clickpay|payment|respStatus|tran_ref).*?(\{.*\})/i';
+        
+        if (preg_match_all($pattern, $logs, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $paymentLogs[] = [
+                    'log' => $match[0],
+                    'data' => $match[2] ?? '{}'
+                ];
+            }
+        }
+        
+        // اخذ آخر 20 سجل فقط
+        $paymentLogs = array_slice(array_reverse($paymentLogs), 0, 20);
+        
+        return view('payment-logs', [
+            'logs' => $paymentLogs
+        ]);
+    } catch (\Exception $e) {
+        return "حدث خطأ في قراءة السجلات: " . $e->getMessage();
+    }
+})->name('view.payment.logs');
+
+// مسار لعرض سجلات الدفع بتنسيق JSON
+Route::get('/api/payment-logs', function () {
+    try {
+        $logFile = storage_path('logs/laravel.log');
+        $logs = file_exists($logFile) ? file_get_contents($logFile) : '';
+        
+        // البحث عن سجلات بوابة الدفع
+        $paymentLogs = [];
+        
+        // البحث عن سجلات معينة مرتبطة ببوابة الدفع
+        $patterns = [
+            'respStatus' => '/\[.*?\] local\.INFO: .*?(respStatus).*?(\{.*\})/i',
+            'tran_ref' => '/\[.*?\] local\.INFO: .*?(tran_ref).*?(\{.*\})/i',
+            'بيانات الاستجابة' => '/\[.*?\] local\.INFO: بيانات الاستجابة الكاملة من كليك باي.*?(\{.*\})/i',
+            'استجابة استعلام' => '/\[.*?\] local\.INFO: استجابة استعلام كليك باي.*?(\{.*\})/i',
+            'نتيجة التحقق' => '/\[.*?\] local\.INFO: نتيجة التحقق من الدفع.*?(\{.*\})/i',
+        ];
+        
+        foreach ($patterns as $type => $pattern) {
+            if (preg_match_all($pattern, $logs, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $jsonStr = $match[1] ?? $match[2] ?? '{}';
+                    $paymentLogs[] = [
+                        'type' => $type,
+                        'timestamp' => substr($match[0], 1, 19),
+                        'data' => json_decode($jsonStr, true)
+                    ];
+                }
+            }
+        }
+        
+        // ترتيب السجلات حسب التاريخ (من الأحدث إلى الأقدم)
+        usort($paymentLogs, function($a, $b) {
+            return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+        });
+        
+        // اخذ آخر 30 سجل فقط
+        $paymentLogs = array_slice($paymentLogs, 0, 30);
+        
+        return response()->json($paymentLogs);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('api.payment.logs');
+
+// مسار اختبار مباشر للتقييم (للتحقق من المشكلة)
+Route::post('/test-rating-direct', [App\Http\Controllers\DebugController::class, 'testAddRating'])->name('debug.add-rating-direct');
+
+// مسار اختبار واجهة API واتساب
+Route::get('/test-whatsapp-api', function () {
+    $service = app(App\Services\WhatsApp\WhatsAppService::class);
+    return response()->json($service->testApiConnection());
+});
+
+// مسار اختبار وظيفة التقييم
+Route::get('/test-rating', function () {
+    return view('test-rating');
+})->middleware(['auth'])->name('test.rating');
+
+// مسارات تصحيح نظام التقييم
+Route::prefix('debug')->middleware(['auth'])->group(function () {
+    Route::get('/test-rating', [App\Http\Controllers\DebugController::class, 'testRating'])->name('debug.test-rating');
+    Route::post('/test-rating', [App\Http\Controllers\DebugController::class, 'testAddRating'])->name('debug.add-rating');
+    Route::get('/reviews', [App\Http\Controllers\DebugController::class, 'viewReviews'])->name('debug.reviews');
+});R o u t e : : p o s t ( ' / g u e s t - p r o d u c t - r a t e ' ,   [ A p p \ H t t p \ C o n t r o l l e r s \ G u e s t R a t i n g C o n t r o l l e r : : c l a s s ,   ' s t o r e ' ] ) - > n a m e ( ' g u e s t . p r o d u c t . r a t e ' ) ;  
+ 

@@ -1,0 +1,355 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\ThemeData;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
+
+class ThemeController extends Controller
+{
+    /**
+     * Display theme customization page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index()
+    {
+        // Get current active theme
+        $activeTheme = Setting::get('active_theme', 'default');
+        
+        // Get available themes
+        $availableThemes = $this->getAvailableThemes();
+        
+        // Get theme data for current store
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+        
+        return view('themes.admin.theme.index', compact('activeTheme', 'availableThemes', 'themeData'));
+    }
+
+    /**
+     * Display active theme customization page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function customize()
+    {
+        // Get current active theme
+        $activeTheme = Setting::get('active_theme', 'default');
+        
+        // Get theme data for current store
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+        
+        // If no theme data exists, create default
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+        
+        return view('themes.admin.theme.customize', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Update theme customization data
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'theme_name' => 'required|string',
+            'custom_css' => 'nullable|string',
+            'custom_js' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $storeId = auth()->user()->store_id ?? null;
+        $themeName = $request->input('theme_name');
+
+        // Get or create theme data
+        $themeData = ThemeData::firstOrCreate(
+            [
+                'store_id' => $storeId,
+                'theme_name' => $themeName,
+            ],
+            [
+                'is_active' => true,
+            ]
+        );
+
+        // Update basic data
+        $themeData->custom_css = $request->input('custom_css');
+        $themeData->custom_js = $request->input('custom_js');
+
+        // Handle hero data
+        if ($request->has('hero_title') || $request->has('hero_description')) {
+            $heroData = $themeData->hero_data ?? [];
+            $heroData['title'] = $request->input('hero_title');
+            $heroData['description'] = $request->input('hero_description');
+            $heroData['button_text'] = $request->input('hero_button_text');
+            $heroData['button_link'] = $request->input('hero_button_link');
+            $themeData->hero_data = $heroData;
+        }
+
+        // Handle banner data
+        if ($request->has('banner_title') || $request->has('banner_description')) {
+            $bannerData = $themeData->banner_data ?? [];
+            $bannerData['title'] = $request->input('banner_title');
+            $bannerData['description'] = $request->input('banner_description');
+            $bannerData['link'] = $request->input('banner_link');
+            $themeData->banner_data = $bannerData;
+        }
+
+        // Handle feature data
+        if ($request->has('features')) {
+            $themeData->feature_data = $request->input('features');
+        }
+
+        // Handle custom data
+        if ($request->has('custom_data')) {
+            $customData = $themeData->custom_data ?? [];
+            foreach ($request->input('custom_data') as $key => $value) {
+                $customData[$key] = $value;
+            }
+            $themeData->custom_data = $customData;
+        }
+
+        // Handle hero image upload
+        if ($request->hasFile('hero_image')) {
+            $heroData = $themeData->hero_data ?? [];
+            
+            // Delete old image if exists
+            if (isset($heroData['main_image'])) {
+                Storage::disk('public')->delete($heroData['main_image']);
+            }
+            
+            $path = $request->file('hero_image')->store('themes/' . $themeName . '/hero', 'public');
+            $heroData['main_image'] = $path;
+            $themeData->hero_data = $heroData;
+        }
+
+        // Handle banner image upload
+        if ($request->hasFile('banner_image')) {
+            $bannerData = $themeData->banner_data ?? [];
+            
+            // Delete old image if exists
+            if (isset($bannerData['main_image'])) {
+                Storage::disk('public')->delete($bannerData['main_image']);
+            }
+            
+            $path = $request->file('banner_image')->store('themes/' . $themeName . '/banner', 'public');
+            $bannerData['main_image'] = $path;
+            $themeData->banner_data = $bannerData;
+        }
+
+        // Handle extra images upload
+        if ($request->hasFile('extra_images')) {
+            $extraImages = $themeData->extra_images ?? [];
+            
+            foreach ($request->file('extra_images') as $key => $file) {
+                // Delete old image if exists
+                if (isset($extraImages[$key])) {
+                    Storage::disk('public')->delete($extraImages[$key]);
+                }
+                
+                $path = $file->store('themes/' . $themeName . '/extra', 'public');
+                $extraImages[$key] = $path;
+            }
+            
+            $themeData->extra_images = $extraImages;
+        }
+
+        $themeData->save();
+
+        return redirect()->back()->with('success', 'تم حفظ إعدادات الثيم بنجاح');
+    }
+
+    /**
+     * Switch active theme
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function switchTheme(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'theme_name' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $themeName = $request->input('theme_name');
+        
+        // Check if theme exists
+        if (!$this->themeExists($themeName)) {
+            return redirect()->back()->with('error', 'الثيم المطلوب غير موجود');
+        }
+
+        // Update active theme in settings
+        Setting::set('active_theme', $themeName);
+        
+        // Update active_theme column in users table for current user
+        $user = auth()->user();
+        if ($user) {
+            $user->active_theme = $themeName;
+            $user->save();
+        }
+
+        // Deactivate all themes for this store
+        $storeId = $user->store_id ?? null;
+        ThemeData::where('store_id', $storeId)->update(['is_active' => false]);
+
+        // Activate selected theme (create if not exists)
+        $themeData = ThemeData::firstOrCreate(
+            [
+                'store_id' => $storeId,
+                'theme_name' => $themeName,
+            ]
+        );
+        $themeData->is_active = true;
+        $themeData->save();
+
+        return redirect()->back()->with('success', 'تم تفعيل الثيم بنجاح');
+    }
+
+    /**
+     * Delete theme image
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image_type' => 'required|in:hero,banner,extra',
+            'image_key' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $storeId = auth()->user()->store_id ?? null;
+        $activeTheme = Setting::get('active_theme', 'default');
+        
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            return response()->json(['error' => 'بيانات الثيم غير موجودة'], 404);
+        }
+
+        $imageType = $request->input('image_type');
+        $imageKey = $request->input('image_key');
+
+        switch ($imageType) {
+            case 'hero':
+                $heroData = $themeData->hero_data ?? [];
+                if (isset($heroData[$imageKey])) {
+                    Storage::disk('public')->delete($heroData[$imageKey]);
+                    unset($heroData[$imageKey]);
+                    $themeData->hero_data = $heroData;
+                }
+                break;
+
+            case 'banner':
+                $bannerData = $themeData->banner_data ?? [];
+                if (isset($bannerData[$imageKey])) {
+                    Storage::disk('public')->delete($bannerData[$imageKey]);
+                    unset($bannerData[$imageKey]);
+                    $themeData->banner_data = $bannerData;
+                }
+                break;
+
+            case 'extra':
+                $extraImages = $themeData->extra_images ?? [];
+                if (isset($extraImages[$imageKey])) {
+                    Storage::disk('public')->delete($extraImages[$imageKey]);
+                    unset($extraImages[$imageKey]);
+                    $themeData->extra_images = $extraImages;
+                }
+                break;
+        }
+
+        $themeData->save();
+
+        return response()->json(['success' => 'تم حذف الصورة بنجاح']);
+    }
+
+    /**
+     * Get available themes
+     *
+     * @return array
+     */
+    private function getAvailableThemes()
+    {
+        $themesPath = resource_path('views/themes');
+        $themes = [];
+
+        if (File::isDirectory($themesPath)) {
+            $directories = File::directories($themesPath);
+
+            foreach ($directories as $directory) {
+                $name = basename($directory);
+                
+                // Skip admin and dashboard themes (special use only)
+                if ($name === 'admin' || $name === 'dashboard') {
+                    continue;
+                }
+
+                // Read theme config if exists
+                $configFile = $directory . '/theme.json';
+                $config = File::exists($configFile) 
+                    ? json_decode(File::get($configFile), true) 
+                    : [];
+
+                $themes[$name] = [
+                    'name' => $name,
+                    'title' => $config['title'] ?? ucfirst($name),
+                    'description' => $config['description'] ?? 'قالب ' . ucfirst($name),
+                    'version' => $config['version'] ?? '1.0',
+                    'author' => $config['author'] ?? '',
+                    'screenshot' => $config['screenshot'] ?? null,
+                ];
+            }
+        }
+
+        return $themes;
+    }
+
+    /**
+     * Check if theme exists
+     *
+     * @param string $themeName
+     * @return bool
+     */
+    private function themeExists($themeName)
+    {
+        $themePath = resource_path('views/themes/' . $themeName);
+        return File::isDirectory($themePath);
+    }
+}

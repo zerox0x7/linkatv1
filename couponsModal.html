@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات الكوبون</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS with coupon- prefix for RTL specific styling needs */
+        .coupon-modal {
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.7);
+            direction: rtl;
+        }
+
+        .coupon-modal.active {
+            display: flex !important;
+        }
+
+        .coupon-modal-content {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .coupon-modal.active .coupon-modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .coupon-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .coupon-scrollbar::-webkit-scrollbar-track {
+            background: #1a1f2e;
+            border-radius: 6px;
+        }
+
+        .coupon-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            border-radius: 6px;
+        }
+
+        .coupon-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #00c4a7, #00a691);
+        }
+
+        .coupon-toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #1a1f2e;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #2a3441;
+        }
+
+        .coupon-toggle.active {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            border-color: #00e1c0;
+            box-shadow: 0 4px 12px rgba(0, 225, 192, 0.3);
+        }
+
+        .coupon-toggle-thumb {
+            position: absolute;
+            top: 2px;
+            right: 2px; /* Changed from left to right for RTL */
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .coupon-toggle.active .coupon-toggle-thumb {
+            transform: translateX(-20px); /* Negative value for RTL */
+        }
+
+        .coupon-gradient-bg {
+            background: linear-gradient(145deg, #232b3e 0%, #1a1f2e 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coupon-header-gradient {
+            background: linear-gradient(135deg, #232b3e 0%, #2a3441 50%, #1a1f2e 100%);
+            border-bottom: 1px solid rgba(0, 225, 192, 0.2);
+            position: relative;
+        }
+
+        .coupon-header-gradient::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00e1c0, transparent);
+        }
+
+        .coupon-btn-primary {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            border: none;
+            color: #232b3e;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coupon-btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%; /* Changed from left to right for RTL */
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: right 0.5s; /* Changed from left to right */
+        }
+
+        .coupon-btn-primary:hover::before {
+            right: 100%; /* Changed from left to right */
+        }
+
+        .coupon-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 225, 192, 0.4);
+        }
+
+        .coupon-btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00e1c0;
+            transform: translateY(-1px);
+        }
+
+        .coupon-section-indicator-1 {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            box-shadow: 0 0 15px rgba(0, 225, 192, 0.4);
+        }
+
+        .coupon-section-indicator-2 {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .coupon-section-indicator-3 {
+            background: linear-gradient(135deg, #ec4899, #f97316);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .coupon-section-indicator-4 {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .coupon-input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            text-align: right; /* RTL text alignment */
+        }
+
+        .coupon-input:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #00e1c0 !important;
+            box-shadow: 0 0 0 3px rgba(0, 225, 192, 0.1) !important;
+            outline: none !important;
+        }
+
+        .coupon-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        /* Custom dropdown styling for RTL */
+        .coupon-select {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: left 12px center; /* Changed from right to left for RTL */
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-left: 40px; /* Changed from padding-right to padding-left */
+            padding-right: 12px;
+            text-align: right; /* RTL text alignment */
+        }
+
+        .coupon-select:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #00e1c0 !important;
+            box-shadow: 0 0 0 3px rgba(0, 225, 192, 0.1) !important;
+            outline: none !important;
+        }
+
+        .coupon-select option {
+            background: #232b3e !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 12px !important;
+            text-align: right; /* RTL text alignment */
+        }
+
+        .coupon-select option:hover {
+            background: #2a3441 !important;
+        }
+
+        .coupon-select option:checked {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7) !important;
+            color: #232b3e !important;
+        }
+
+        .coupon-stat-card-1 {
+            background: linear-gradient(135deg, rgba(0, 225, 192, 0.1), rgba(0, 196, 167, 0.05));
+            border: 1px solid rgba(0, 225, 192, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-stat-card-2 {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-stat-card-3 {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.05));
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-stat-card-4 {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-open-modal-gradient {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            box-shadow: 0 8px 32px rgba(0, 225, 192, 0.3);
+        }
+
+        .coupon-section-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .coupon-checkbox-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .coupon-checkbox-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 225, 192, 0.3);
+        }
+
+        .coupon-tag {
+            background: rgba(0, 225, 192, 0.15);
+            border: 1px solid rgba(0, 225, 192, 0.3);
+            color: #00e1c0;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-tag:hover {
+            background: rgba(0, 225, 192, 0.25);
+            border-color: rgba(0, 225, 192, 0.5);
+        }
+
+        .coupon-tag .coupon-tag-remove {
+            position: absolute;
+            top: -6px;
+            left: -6px; /* Changed from right to left for RTL */
+            background: rgba(255, 82, 82, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .coupon-tag:hover .coupon-tag-remove {
+            opacity: 1;
+        }
+
+        @keyframes couponModalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .coupon-modal.active .coupon-modal-content {
+            animation: couponModalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Glass morphism effect */
+        .coupon-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coupon-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .coupon-close-btn:hover {
+            background: rgba(255, 82, 82, 0.2);
+            border-color: rgba(255, 82, 82, 0.4);
+            transform: rotate(90deg);
+        }
+
+        /* Wizard Guide Styles - RTL adjustments */
+        .coupon-wizard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            direction: rtl;
+        }
+
+        .coupon-wizard-overlay.active {
+            display: block;
+        }
+
+        .coupon-wizard-spotlight {
+            position: absolute;
+            border: 3px solid #00e1c0;
+            border-radius: 12px;
+            box-shadow: 0 0 0 4px rgba(0, 225, 192, 0.3), 0 0 30px rgba(0, 225, 192, 0.6);
+            background: transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10001;
+            pointer-events: none;
+        }
+
+        .coupon-wizard-tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, #232b3e, #1a1f2e);
+            border: 1px solid rgba(0, 225, 192, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            min-width: 280px;
+            max-width: 350px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 225, 192, 0.2);
+            z-index: 10002;
+            backdrop-filter: blur(20px);
+            animation: tooltipSlideIn 0.4s ease;
+            text-align: right; /* RTL text alignment */
+        }
+
+        .coupon-wizard-tooltip::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .coupon-wizard-tooltip.top::before {
+            bottom: -10px;
+            right: 20px; /* Changed from left to right for RTL */
+            border-width: 10px 10px 0 10px;
+            border-color: rgba(0, 225, 192, 0.3) transparent transparent transparent;
+        }
+
+        .coupon-wizard-tooltip.bottom::before {
+            top: -10px;
+            right: 20px; /* Changed from left to right for RTL */
+            border-width: 0 10px 10px 10px;
+            border-color: transparent transparent rgba(0, 225, 192, 0.3) transparent;
+        }
+
+        .coupon-wizard-tooltip.left::before {
+            left: -10px; /* This remains the same as it's the arrow pointing direction */
+            top: 20px;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent rgba(0, 225, 192, 0.3);
+        }
+
+        .coupon-wizard-tooltip.right::before {
+            right: -10px; /* Changed from left to right for RTL */
+            top: 20px;
+            border-width: 10px 10px 10px 0;
+            border-color: transparent rgba(0, 225, 192, 0.3) transparent transparent;
+        }
+
+        .coupon-wizard-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 225, 192, 0.2);
+        }
+
+        .coupon-wizard-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 12px; /* Changed from margin-right to margin-left for RTL */
+            color: #232b3e;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .coupon-wizard-title {
+            color: #00e1c0;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .coupon-wizard-description {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .coupon-wizard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .coupon-wizard-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .coupon-wizard-progress-bar {
+            width: 60px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .coupon-wizard-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00e1c0, #00c4a7);
+            transition: width 0.3s ease;
+        }
+
+        .coupon-wizard-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .coupon-wizard-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .coupon-wizard-btn-skip {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .coupon-wizard-btn-skip:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .coupon-wizard-btn-next {
+            background: linear-gradient(135deg, #00e1c0, #00c4a7);
+            color: #232b3e;
+            font-weight: 600;
+        }
+
+        .coupon-wizard-btn-next:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 225, 192, 0.4);
+        }
+
+        .coupon-wizard-btn-prev {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .coupon-wizard-btn-prev:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00e1c0;
+        }
+
+        .coupon-wizard-btn-finish {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: 600;
+        }
+
+        .coupon-wizard-btn-finish:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+
+        .coupon-wizard-floating-btn {
+            position: fixed;
+            bottom: 8rem;
+            left: 8px; /* Changed from right to left for RTL */
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .coupon-wizard-floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6);
+        }
+
+        .coupon-section-card.highlighted {
+            border: 2px solid #00e1c0 !important;
+            box-shadow: 0 0 20px rgba(0, 225, 192, 0.3) !important;
+            background: rgba(0, 225, 192, 0.05) !important;
+            transition: all 0.4s ease !important;
+        }
+
+        /* RTL specific adjustments */
+        .rtl-text {
+            text-align: right;
+            direction: rtl;
+        }
+
+        .coupon-input[type="search"] {
+            background-position: left 12px center !important;
+            padding-left: 40px !important;
+            padding-right: 12px !important;
+        }
+
+        /* Search icon positioning for RTL */
+        .search-icon-container {
+            left: 12px !important;
+            right: auto !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes tooltipSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .coupon-wizard-pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+   <div id="couponModal" class="coupon-modal fixed inset-0 w-full h-full z-50 hidden items-center justify-center p-4">
+    <div class="coupon-modal-content coupon-gradient-bg rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl">
+        <!-- Header -->
+        <div class="coupon-header-gradient p-6 text-white relative" id="modalHeader">
+            <button class="coupon-close-btn absolute top-4 left-4 text-white w-10 h-10 rounded-full cursor-pointer flex items-center justify-center" onclick="closeCouponModal()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent rtl-text">إعدادات الكوبون</h2>
+            <p class="opacity-90 text-sm text-gray-300 rtl-text">قم بتكوين كوبون التخفيض السريع الخاص بك</p>
+        </div>
+
+        <!-- Body -->
+        <div class="coupon-scrollbar p-6 max-h-[60vh] overflow-y-auto" id="modalBody">
+            <form>
+                <!-- Basic Settings Section -->
+                <div class="coupon-section-card" id="basicSettings">
+                    <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                        <div class="coupon-section-indicator-1 w-2 h-6 rounded-full ml-3"></div>
+                        الإعدادات الأساسية
+                    </h3>
+                    
+                    <!-- Coupon Code & Active Status -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">رمز الكوبون</label>
+                            <input type="text" value="FLASH50" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحالة</label>
+                            <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                <span class="text-white text-sm font-medium rtl-text">نشط</span>
+                                <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                    <div class="coupon-toggle-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">تاريخ البداية</label>
+                            <input type="datetime-local" value="2025-06-05T00:00" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">تاريخ النهاية</label>
+                            <input type="datetime-local" value="2025-06-07T23:59" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Limits -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأقصى للاستخدام</label>
+                            <input type="number" value="200" class="coupon-input w-full p-3 rounded-xl text-sm" id="maxUses">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">المُستخدم</label>
+                            <input type="number" value="89" readonly class="coupon-input w-full p-3 rounded-xl text-sm opacity-60 cursor-not-allowed" id="usedCount">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">مدة البقاء (ث)</label>
+                            <input type="number" value="300" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Settings -->
+                <div class="coupon-section-card" id="discountSettings">
+                    <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                        <div class="coupon-section-indicator-2 w-2 h-6 rounded-full ml-3"></div>
+                        إعدادات الخصم
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">النوع</label>
+                            <select class="coupon-select w-full p-3 rounded-xl text-sm cursor-pointer">
+                                <option value="percentage">نسبة مئوية</option>
+                                <option value="fixed">مبلغ ثابت</option>
+                                <option value="free_shipping">شحن مجاني</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">القيمة</label>
+                            <input type="number" value="50" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأدنى للطلب</label>
+                            <input type="number" value="100" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأقصى للخصم</label>
+                            <input type="number" value="500" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories & Products -->
+                <div class="coupon-section-card" id="categoriesProducts">
+                    <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                        <div class="coupon-section-indicator-3 w-2 h-6 rounded-full ml-3"></div>
+                        الفئات والمنتجات
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الفئات</label>
+                            <div class="relative mb-3">
+                                <input type="text" placeholder="البحث في الفئات..." class="coupon-input w-full p-3 pl-10 rounded-xl text-sm" id="categorySearch" onkeyup="filterCategories()">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon-container">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2" id="selectedCategories">
+                                <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-category="electronics">
+                                    الإلكترونيات
+                                    <span class="coupon-tag-remove" onclick="removeCategory('electronics')">×</span>
+                                </span>
+                                <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-category="fashion">
+                                    الأزياء
+                                    <span class="coupon-tag-remove" onclick="removeCategory('fashion')">×</span>
+                                </span>
+                            </div>
+                            <div class="mt-2 space-y-1 max-h-32 overflow-y-auto coupon-scrollbar" id="categoryList">
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('home-garden', 'المنزل والحديقة')">
+                                    <span class="text-white rtl-text">المنزل والحديقة</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('sports', 'الرياضة والهواء الطلق')">
+                                    <span class="text-white rtl-text">الرياضة والهواء الطلق</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('books', 'الكتب والوسائط')">
+                                    <span class="text-white rtl-text">الكتب والوسائط</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('automotive', 'السيارات')">
+                                    <span class="text-white rtl-text">السيارات</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">المنتجات</label>
+                            <div class="relative mb-3">
+                                <input type="text" placeholder="البحث في المنتجات..." class="coupon-input w-full p-3 pl-10 rounded-xl text-sm" id="productSearch" onkeyup="filterProducts()">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon-container">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2" id="selectedProducts">
+                                <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-product="iphone-15">
+                                    آيفون 15
+                                    <span class="coupon-tag-remove" onclick="removeProduct('iphone-15')">×</span>
+                                </span>
+                                <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-product="macbook">
+                                    ماك بوك
+                                    <span class="coupon-tag-remove" onclick="removeProduct('macbook')">×</span>
+                                </span>
+                            </div>
+                            <div class="mt-2 space-y-1 max-h-32 overflow-y-auto coupon-scrollbar" id="productList">
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('ipad-pro', 'آيباد برو')">
+                                    <span class="text-white rtl-text">آيباد برو</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('airpods', 'إيربودز برو')">
+                                    <span class="text-white rtl-text">إيربودز برو</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('samsung-tv', 'تلفزيون سامسونج 4K')">
+                                    <span class="text-white rtl-text">تلفزيون سامسونج 4K</span>
+                                </div>
+                                <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('nike-shoes', 'نايك إير ماكس')">
+                                    <span class="text-white rtl-text">نايك إير ماكس</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings -->
+                <div class="coupon-section-card" id="advancedSettings">
+                    <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                        <div class="coupon-section-indicator-4 w-2 h-6 rounded-full ml-3"></div>
+                        الإعدادات المتقدمة
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">حد المستخدم الواحد</label>
+                            <input type="number" value="1" class="coupon-input w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الأولوية</label>
+                            <select class="coupon-select w-full p-3 rounded-xl text-sm cursor-pointer">
+                                <option value="high">عالية</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Feature Toggles -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                            <span class="text-white text-sm rtl-text">تطبيق تلقائي</span>
+                            <div class="coupon-toggle" onclick="toggleSwitch(this)">
+                                <div class="coupon-toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                            <span class="text-white text-sm rtl-text">تكديس الكوبونات</span>
+                            <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                <div class="coupon-toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                            <span class="text-white text-sm rtl-text">إشعارات البريد الإلكتروني</span>
+                            <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                <div class="coupon-toggle-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                            <span class="text-white text-sm rtl-text">عرض في الصفحة الرئيسية</span>
+                            <div class="coupon-toggle" onclick="toggleSwitch(this)">
+                                <div class="coupon-toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="usageStats">
+                    <div class="coupon-stat-card-1 p-4 rounded-xl">
+                        <div class="text-xl font-bold mb-1 text-[#00e1c0] rtl-text" id="usageCount">89</div>
+                        <div class="text-xs text-gray-400 rtl-text">مُستخدم</div>
+                    </div>
+                    <div class="coupon-stat-card-2 p-4 rounded-xl">
+                        <div class="text-xl font-bold mb-1 text-green-400 rtl-text">12 ألف ر.س</div>
+                        <div class="text-xs text-gray-400 rtl-text">وفورات</div>
+                    </div>
+                    <div class="coupon-stat-card-3 p-4 rounded-xl">
+                        <div class="text-xl font-bold mb-1 text-orange-400 rtl-text" id="usageRate">44.5%</div>
+                        <div class="text-xs text-gray-400 rtl-text">معدل</div>
+                    </div>
+                    <div class="coupon-stat-card-4 p-4 rounded-xl">
+                        <div class="text-xl font-bold mb-1 text-purple-400 rtl-text">2ي 15س</div>
+                        <div class="text-xs text-gray-400 rtl-text">متبقي</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3" id="actionButtons">
+                    <button type="submit" class="coupon-btn-primary flex-1 px-6 py-3 font-semibold rounded-xl transition-all rtl-text">حفظ الإعدادات</button>
+                    <button type="button" class="coupon-btn-secondary flex-1 px-6 py-3 font-medium rounded-xl transition-all rtl-text">معاينة</button>
+                    <button type="button" class="coupon-btn-secondary flex-1 px-6 py-3 font-medium rounded-xl transition-all rtl-text">إعادة تعيين</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+</head>
+<body class="bg-slate-100 min-h-screen p-8" dir="rtl">
+    
+    <!-- Demo content -->
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-slate-800 text-3xl font-bold mb-4 rtl-text">محتوى صفحتك الرئيسية</h1>
+        <p class="text-slate-600 leading-relaxed rtl-text">هذا هو محتوى صفحتك الرئيسية. نافذة إعدادات الكوبون معزولة تماماً مع CSS مُسبق لمنع أي تعارضات. انقر على الزر العائم في الزاوية اليسرى السفلى لفتح النافذة.</p>
+        
+        <div class="mt-8 p-4 bg-slate-50 rounded-lg border-r-4 border-indigo-500">
+            <strong class="text-slate-800 rtl-text">الميزات:</strong>
+            <ul class="mt-2 text-slate-600 space-y-1">
+                <li class="flex items-center rtl-text"><span class="w-2 h-2 bg-indigo-500 rounded-full ml-2"></span>تصميم حديث مدمج بثيم #232b3e</li>
+                <li class="flex items-center rtl-text"><span class="w-2 h-2 bg-indigo-500 rounded-full ml-2"></span>لون التركيز التركوازي (#00e1c0) للإجراءات والتمييز</li>
+                <li class="flex items-center rtl-text"><span class="w-2 h-2 bg-indigo-500 rounded-full ml-2"></span>تباعد محسّن وتخطيط متوافق مع الهواتف المحمولة</li>
+                <li class="flex items-center rtl-text"><span class="w-2 h-2 bg-indigo-500 rounded-full ml-2"></span>تصميم متجاوب مع العوامل الأصغر للنماذج</li>
+                <li class="flex items-center rtl-text"><span class="w-2 h-2 bg-purple-500 rounded-full ml-2"></span>جولة تفاعلية مُوجهة لجميع الأقسام</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Open Modal Button -->
+    <button class="couponSettings-open-modal-gradient fixed bottom-8 left-8 text-white border-none w-14 h-14 rounded-full cursor-pointer shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 flex items-center justify-center" onclick="openCouponModal()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+    </button>
+
+    <!-- Wizard Guide Floating Button -->
+    <button class="coupon-wizard-floating-btn" onclick="startWizardGuide()" title="بدء الجولة المُوجهة">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </button>
+
+    <!-- Wizard Guide Overlay -->
+    <div id="couponWizardOverlay" class="coupon-wizard-overlay">
+        <div id="couponWizardSpotlight" class="coupon-wizard-spotlight"></div>
+        <div id="couponWizardTooltip" class="coupon-wizard-tooltip">
+            <div class="coupon-wizard-header">
+                <div class="coupon-wizard-icon" id="wizardStepIcon">1</div>
+                <h3 class="coupon-wizard-title" id="wizardTitle">مرحباً بك في إعدادات الكوبون</h3>
+            </div>
+            <p class="coupon-wizard-description" id="wizardDescription">
+                دعنا نأخذ جولة سريعة في نافذة إعدادات الكوبون لمساعدتك في فهم جميع الميزات المتاحة.
+            </p>
+            <div class="coupon-wizard-controls">
+                <div class="coupon-wizard-progress">
+                    <span id="wizardProgressText">1 / 6</span>
+                    <div class="coupon-wizard-progress-bar">
+                        <div class="coupon-wizard-progress-fill" id="wizardProgressFill" style="width: 16.67%"></div>
+                    </div>
+                </div>
+                <div class="coupon-wizard-buttons">
+                    <button class="coupon-wizard-btn coupon-wizard-btn-skip" onclick="skipWizard()">تخطي الجولة</button>
+                    <button class="coupon-wizard-btn coupon-wizard-btn-prev" id="wizardPrevBtn" onclick="previousWizardStep()" style="display: none;">السابق</button>
+                    <button class="coupon-wizard-btn coupon-wizard-btn-next" id="wizardNextBtn" onclick="nextWizardStep()">التالي</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupon Settings Modal -->
+    <div id="couponModal" class="coupon-modal fixed inset-0 w-full h-full z-50 hidden items-center justify-center p-4">
+        <div class="coupon-modal-content coupon-gradient-bg rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl">
+            <!-- Header -->
+            <div class="coupon-header-gradient p-6 text-white relative" id="modalHeader">
+                <button class="coupon-close-btn absolute top-4 left-4 text-white w-10 h-10 rounded-full cursor-pointer flex items-center justify-center" onclick="closeCouponModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <h2 class="text-2xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent rtl-text">إعدادات الكوبون</h2>
+                <p class="opacity-90 text-sm text-gray-300 rtl-text">قم بتكوين كوبون التخفيض السريع الخاص بك</p>
+            </div>
+
+            <!-- Body -->
+            <div class="coupon-scrollbar p-6 max-h-[60vh] overflow-y-auto" id="modalBody">
+                <form>
+                    <!-- Basic Settings Section -->
+                    <div class="coupon-section-card" id="basicSettings">
+                        <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                            <div class="coupon-section-indicator-1 w-2 h-6 rounded-full ml-3"></div>
+                            الإعدادات الأساسية
+                        </h3>
+                        
+                        <!-- Coupon Code & Active Status -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">رمز الكوبون</label>
+                                <input type="text" value="FLASH50" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحالة</label>
+                                <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                    <span class="text-white text-sm font-medium rtl-text">نشط</span>
+                                    <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                        <div class="coupon-toggle-thumb"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">تاريخ البداية</label>
+                                <input type="datetime-local" value="2025-06-05T00:00" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">تاريخ النهاية</label>
+                                <input type="datetime-local" value="2025-06-07T23:59" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Limits -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأقصى للاستخدام</label>
+                                <input type="number" value="200" class="coupon-input w-full p-3 rounded-xl text-sm" id="maxUses">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">المُستخدم</label>
+                                <input type="number" value="89" readonly class="coupon-input w-full p-3 rounded-xl text-sm opacity-60 cursor-not-allowed" id="usedCount">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">مدة البقاء (ث)</label>
+                                <input type="number" value="300" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount Settings -->
+                    <div class="coupon-section-card" id="discountSettings">
+                        <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                            <div class="coupon-section-indicator-2 w-2 h-6 rounded-full ml-3"></div>
+                            إعدادات الخصم
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">النوع</label>
+                                <select class="coupon-select w-full p-3 rounded-xl text-sm cursor-pointer">
+                                    <option value="percentage">نسبة مئوية</option>
+                                    <option value="fixed">مبلغ ثابت</option>
+                                    <option value="free_shipping">شحن مجاني</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">القيمة</label>
+                                <input type="number" value="50" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأدنى للطلب</label>
+                                <input type="number" value="100" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الحد الأقصى للخصم</label>
+                                <input type="number" value="500" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categories & Products -->
+                    <div class="coupon-section-card" id="categoriesProducts">
+                        <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                            <div class="coupon-section-indicator-3 w-2 h-6 rounded-full ml-3"></div>
+                            الفئات والمنتجات
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الفئات</label>
+                                <div class="relative mb-3">
+                                    <input type="text" placeholder="البحث في الفئات..." class="coupon-input w-full p-3 pl-10 rounded-xl text-sm" id="categorySearch" onkeyup="filterCategories()">
+                                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon-container">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2" id="selectedCategories">
+                                    <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-category="electronics">
+                                        الإلكترونيات
+                                        <span class="coupon-tag-remove" onclick="removeCategory('electronics')">×</span>
+                                    </span>
+                                    <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-category="fashion">
+                                        الأزياء
+                                        <span class="coupon-tag-remove" onclick="removeCategory('fashion')">×</span>
+                                    </span>
+                                </div>
+                                <div class="mt-2 space-y-1 max-h-32 overflow-y-auto coupon-scrollbar" id="categoryList">
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('home-garden', 'المنزل والحديقة')">
+                                        <span class="text-white rtl-text">المنزل والحديقة</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('sports', 'الرياضة والهواء الطلق')">
+                                        <span class="text-white rtl-text">الرياضة والهواء الطلق</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('books', 'الكتب والوسائط')">
+                                        <span class="text-white rtl-text">الكتب والوسائط</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addCategory('automotive', 'السيارات')">
+                                        <span class="text-white rtl-text">السيارات</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">المنتجات</label>
+                                <div class="relative mb-3">
+                                    <input type="text" placeholder="البحث في المنتجات..." class="coupon-input w-full p-3 pl-10 rounded-xl text-sm" id="productSearch" onkeyup="filterProducts()">
+                                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon-container">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2" id="selectedProducts">
+                                    <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-product="iphone-15">
+                                        آيفون 15
+                                        <span class="coupon-tag-remove" onclick="removeProduct('iphone-15')">×</span>
+                                    </span>
+                                    <span class="coupon-tag px-3 py-1 rounded-full text-xs" data-product="macbook">
+                                        ماك بوك
+                                        <span class="coupon-tag-remove" onclick="removeProduct('macbook')">×</span>
+                                    </span>
+                                </div>
+                                <div class="mt-2 space-y-1 max-h-32 overflow-y-auto coupon-scrollbar" id="productList">
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('ipad-pro', 'آيباد برو')">
+                                        <span class="text-white rtl-text">آيباد برو</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('airpods', 'إيربودز برو')">
+                                        <span class="text-white rtl-text">إيربودز برو</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('samsung-tv', 'تلفزيون سامسونج 4K')">
+                                        <span class="text-white rtl-text">تلفزيون سامسونج 4K</span>
+                                    </div>
+                                    <div class="coupon-checkbox-card flex items-center p-2 rounded-lg cursor-pointer text-sm" onclick="addProduct('nike-shoes', 'نايك إير ماكس')">
+                                        <span class="text-white rtl-text">نايك إير ماكس</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="coupon-section-card" id="advancedSettings">
+                        <h3 class="text-white text-lg font-bold mb-4 flex items-center rtl-text">
+                            <div class="coupon-section-indicator-4 w-2 h-6 rounded-full ml-3"></div>
+                            الإعدادات المتقدمة
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">حد المستخدم الواحد</label>
+                                <input type="number" value="1" class="coupon-input w-full p-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-xs font-semibold mb-2 rtl-text">الأولوية</label>
+                                <select class="coupon-select w-full p-3 rounded-xl text-sm cursor-pointer">
+                                    <option value="high">عالية</option>
+                                    <option value="medium">متوسطة</option>
+                                    <option value="low">منخفضة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Feature Toggles -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                <span class="text-white text-sm rtl-text">تطبيق تلقائي</span>
+                                <div class="coupon-toggle" onclick="toggleSwitch(this)">
+                                    <div class="coupon-toggle-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                <span class="text-white text-sm rtl-text">تكديس الكوبونات</span>
+                                <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                    <div class="coupon-toggle-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                <span class="text-white text-sm rtl-text">إشعارات البريد الإلكتروني</span>
+                                <div class="coupon-toggle active" onclick="toggleSwitch(this)">
+                                    <div class="coupon-toggle-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="coupon-glass flex items-center justify-between p-3 rounded-xl">
+                                <span class="text-white text-sm rtl-text">عرض في الصفحة الرئيسية</span>
+                                <div class="coupon-toggle" onclick="toggleSwitch(this)">
+                                    <div class="coupon-toggle-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Statistics -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="usageStats">
+                        <div class="coupon-stat-card-1 p-4 rounded-xl">
+                            <div class="text-xl font-bold mb-1 text-[#00e1c0] rtl-text" id="usageCount">89</div>
+                            <div class="text-xs text-gray-400 rtl-text">مُستخدم</div>
+                        </div>
+                        <div class="coupon-stat-card-2 p-4 rounded-xl">
+                            <div class="text-xl font-bold mb-1 text-green-400 rtl-text">12 ألف ر.س</div>
+                            <div class="text-xs text-gray-400 rtl-text">وفورات</div>
+                        </div>
+                        <div class="coupon-stat-card-3 p-4 rounded-xl">
+                            <div class="text-xl font-bold mb-1 text-orange-400 rtl-text" id="usageRate">44.5%</div>
+                            <div class="text-xs text-gray-400 rtl-text">معدل</div>
+                        </div>
+                        <div class="coupon-stat-card-4 p-4 rounded-xl">
+                            <div class="text-xl font-bold mb-1 text-purple-400 rtl-text">2ي 15س</div>
+                            <div class="text-xs text-gray-400 rtl-text">متبقي</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3" id="actionButtons">
+                        <button type="submit" class="coupon-btn-primary flex-1 px-6 py-3 font-semibold rounded-xl transition-all rtl-text">حفظ الإعدادات</button>
+                        <button type="button" class="coupon-btn-secondary flex-1 px-6 py-3 font-medium rounded-xl transition-all rtl-text">معاينة</button>
+                        <button type="button" class="coupon-btn-secondary flex-1 px-6 py-3 font-medium rounded-xl transition-all rtl-text">إعادة تعيين</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openCouponModal() {
+            document.getElementById('couponModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCouponModal() {
+            document.getElementById('couponModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Toggle Switch Function
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // Categories functionality
+        function addCategory(categoryId, categoryName) {
+            const selectedCategories = document.getElementById('selectedCategories');
+            const existingCategory = selectedCategories.querySelector(`[data-category="${categoryId}"]`);
+            
+            if (!existingCategory) {
+                const categoryTag = document.createElement('span');
+                categoryTag.className = 'coupon-tag px-3 py-1 rounded-full text-xs';
+                categoryTag.setAttribute('data-category', categoryId);
+                categoryTag.innerHTML = `
+                    ${categoryName}
+                    <span class="coupon-tag-remove" onclick="removeCategory('${categoryId}')">×</span>
+                `;
+                selectedCategories.appendChild(categoryTag);
+            }
+        }
+
+        function removeCategory(categoryId) {
+            const categoryTag = document.querySelector(`[data-category="${categoryId}"]`);
+            if (categoryTag) {
+                categoryTag.remove();
+            }
+        }
+
+        function filterCategories() {
+            const searchTerm = document.getElementById('categorySearch').value.toLowerCase();
+            const categoryItems = document.querySelectorAll('#categoryList .coupon-checkbox-card');
+            
+            categoryItems.forEach(item => {
+                const categoryName = item.textContent.toLowerCase();
+                if (categoryName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Products functionality
+        function addProduct(productId, productName) {
+            const selectedProducts = document.getElementById('selectedProducts');
+            const existingProduct = selectedProducts.querySelector(`[data-product="${productId}"]`);
+            
+            if (!existingProduct) {
+                const productTag = document.createElement('span');
+                productTag.className = 'coupon-tag px-3 py-1 rounded-full text-xs';
+                productTag.setAttribute('data-product', productId);
+                productTag.innerHTML = `
+                    ${productName}
+                    <span class="coupon-tag-remove" onclick="removeProduct('${productId}')">×</span>
+                `;
+                selectedProducts.appendChild(productTag);
+            }
+        }
+
+        function removeProduct(productId) {
+            const productTag = document.querySelector(`[data-product="${productId}"]`);
+            if (productTag) {
+                productTag.remove();
+            }
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+            const productItems = document.querySelectorAll('#productList .coupon-checkbox-card');
+            
+            productItems.forEach(item => {
+                const productName = item.textContent.toLowerCase();
+                if (productName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('couponModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCouponModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCouponModal();
+                if (wizardActive) {
+                    skipWizard();
+                }
+            }
+        });
+
+        // Real-time usage percentage calculation
+        function updateUsageRate() {
+            const used = parseInt(document.getElementById('usedCount').value) || 0;
+            const max = parseInt(document.getElementById('maxUses').value) || 1;
+            const percentage = ((used / max) * 100).toFixed(1);
+            document.getElementById('usageRate').textContent = percentage + '%';
+            document.getElementById('usageCount').textContent = used;
+        }
+
+        // Add event listeners for real-time updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const maxUsesInput = document.getElementById('maxUses');
+            const usedCountInput = document.getElementById('usedCount');
+            
+            if (maxUsesInput) {
+                maxUsesInput.addEventListener('input', updateUsageRate);
+            }
+            if (usedCountInput) {
+                usedCountInput.addEventListener('input', updateUsageRate);
+            }
+
+            // Initialize usage rate
+            updateUsageRate();
+        });
+
+        // Form submission handler
+        document.querySelector('.coupon-modal form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('تم حفظ إعدادات الكوبون بنجاح!');
+            closeCouponModal();
+        });
+
+        // Wizard Guide System
+        let wizardActive = false;
+        let currentWizardStep = 0;
+
+        const wizardSteps = [
+            {
+                target: 'modalHeader',
+                title: 'مرحباً بك في إعدادات الكوبون',
+                description: 'تتيح لك هذه النافذة تكوين جميع جوانب كوبونات التخفيض السريع الخاصة بك. دعنا نستكشف كل قسم لمساعدتك في الحصول على أقصى استفادة من حملات الكوبون الخاصة بك.',
+                position: 'bottom'
+            },
+            {
+                target: 'basicSettings',
+                title: 'الإعدادات الأساسية',
+                description: 'ابدأ من هنا لإعداد رمز الكوبون الخاص بك وحالة التفعيل والتواريخ الصالحة وحدود الاستخدام. هذه هي الإعدادات الأساسية التي تحدد كيفية عمل الكوبون الخاص بك.',
+                position: 'top'
+            },
+            {
+                target: 'discountSettings',
+                title: 'تكوين الخصم',
+                description: 'قم بتكوين نوع الخصم (نسبة مئوية أو مبلغ ثابت أو شحن مجاني) وقيمة الخصم والحد الأدنى لمتطلبات الطلب والحد الأقصى لسقف الخصم للتحكم في تأثير عرضك.',
+                position: 'top'
+            },
+            {
+                target: 'categoriesProducts',
+                title: 'الفئات والمنتجات',
+                description: 'حدد فئات المنتجات والمنتجات الفردية التي ينطبق عليها هذا الكوبون. استخدم وظيفة البحث للعثور بسرعة على العناصر وتحديدها، أو اتركها فارغة للتطبيق على جميع المنتجات.',
+                position: 'top'
+            },
+            {
+                target: 'advancedSettings',
+                title: 'الخيارات المتقدمة',
+                description: 'قم بضبط الكوبون الخاص بك بدقة مع حدود المستخدم الواحد وإعدادات الأولوية والميزات الخاصة مثل التطبيق التلقائي وتكديس الكوبونات وإشعارات البريد الإلكتروني ورؤية الصفحة الرئيسية.',
+                position: 'top'
+            },
+            {
+                target: 'usageStats',
+                title: 'إحصائيات الاستخدام والإجراءات',
+                description: 'راقب أداء الكوبون الخاص بك مع الإحصائيات في الوقت الفعلي التي تظهر عدد الاستخدامات والوفورات الإجمالية ومعدل التحويل والوقت المتبقي. استخدم أزرار الإجراء لحفظ أو معاينة أو إعادة تعيين إعداداتك.',
+                position: 'top'
+            }
+        ];
+
+        function startWizardGuide() {
+            if (!document.getElementById('couponModal').classList.contains('active')) {
+                openCouponModal();
+                setTimeout(() => {
+                    initializeWizard();
+                }, 500);
+            } else {
+                initializeWizard();
+            }
+        }
+
+        function initializeWizard() {
+            wizardActive = true;
+            currentWizardStep = 0;
+            document.getElementById('couponWizardOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            showWizardStep(currentWizardStep);
+        }
+
+        function showWizardStep(stepIndex) {
+            const step = wizardSteps[stepIndex];
+            const targetElement = document.getElementById(step.target);
+            const spotlight = document.getElementById('couponWizardSpotlight');
+            const tooltip = document.getElementById('couponWizardTooltip');
+
+            if (!targetElement) return;
+
+            // Scroll target into view within modal
+            const modalBody = document.getElementById('modalBody');
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Highlight the target section
+            document.querySelectorAll('.coupon-section-card').forEach(card => {
+                card.classList.remove('highlighted');
+            });
+            
+            if (targetElement.classList.contains('coupon-section-card')) {
+                targetElement.classList.add('highlighted');
+            }
+
+            // Position spotlight
+            setTimeout(() => {
+                const rect = targetElement.getBoundingClientRect();
+                spotlight.style.left = (rect.left - 10) + 'px';
+                spotlight.style.top = (rect.top - 10) + 'px';
+                spotlight.style.width = (rect.width + 20) + 'px';
+                spotlight.style.height = (rect.height + 20) + 'px';
+
+                // Position tooltip
+                positionTooltip(tooltip, rect, step.position);
+
+                // Update tooltip content
+                updateTooltipContent(stepIndex, step);
+            }, 300);
+        }
+
+        function positionTooltip(tooltip, targetRect, preferredPosition) {
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            tooltip.className = 'coupon-wizard-tooltip';
+
+            let left, top, position = preferredPosition;
+
+            // Calculate position based on available space
+            switch (position) {
+                case 'top':
+                    left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+                    top = targetRect.top - tooltipRect.height - 20;
+                    if (top < 20) position = 'bottom';
+                    break;
+                case 'bottom':
+                    left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+                    top = targetRect.bottom + 20;
+                    if (top + tooltipRect.height > viewportHeight - 20) position = 'top';
+                    break;
+                case 'left':
+                    left = targetRect.left - tooltipRect.width - 20;
+                    top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+                    if (left < 20) position = 'right';
+                    break;
+                case 'right':
+                    left = targetRect.right + 20;
+                    top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+                    if (left + tooltipRect.width > viewportWidth - 20) position = 'left';
+                    break;
+            }
+
+            // Recalculate if position changed
+            if (position !== preferredPosition) {
+                switch (position) {
+                    case 'top':
+                        left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+                        top = targetRect.top - tooltipRect.height - 20;
+                        break;
+                    case 'bottom':
+                        left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+                        top = targetRect.bottom + 20;
+                        break;
+                    case 'left':
+                        left = targetRect.left - tooltipRect.width - 20;
+                        top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+                        break;
+                    case 'right':
+                        left = targetRect.right + 20;
+                        top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+                        break;
+                }
+            }
+
+            // Ensure tooltip stays within viewport
+            left = Math.max(20, Math.min(left, viewportWidth - tooltipRect.width - 20));
+            top = Math.max(20, Math.min(top, viewportHeight - tooltipRect.height - 20));
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.add(position);
+        }
+
+        function updateTooltipContent(stepIndex, step) {
+            document.getElementById('wizardStepIcon').textContent = stepIndex + 1;
+            document.getElementById('wizardTitle').textContent = step.title;
+            document.getElementById('wizardDescription').textContent = step.description;
+            document.getElementById('wizardProgressText').textContent = `${stepIndex + 1} / ${wizardSteps.length}`;
+            
+            const progressPercent = ((stepIndex + 1) / wizardSteps.length) * 100;
+            document.getElementById('wizardProgressFill').style.width = progressPercent + '%';
+
+            // Update button states
+            const prevBtn = document.getElementById('wizardPrevBtn');
+            const nextBtn = document.getElementById('wizardNextBtn');
+
+            if (stepIndex === 0) {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'inline-block';
+            }
+
+            if (stepIndex === wizardSteps.length - 1) {
+                nextBtn.textContent = 'إنهاء';
+                nextBtn.className = 'coupon-wizard-btn coupon-wizard-btn-finish';
+            } else {
+                nextBtn.textContent = 'التالي';
+                nextBtn.className = 'coupon-wizard-btn coupon-wizard-btn-next';
+            }
+        }
+
+        function nextWizardStep() {
+            if (currentWizardStep < wizardSteps.length - 1) {
+                currentWizardStep++;
+                showWizardStep(currentWizardStep);
+            } else {
+                finishWizard();
+            }
+        }
+
+        function previousWizardStep() {
+            if (currentWizardStep > 0) {
+                currentWizardStep--;
+                showWizardStep(currentWizardStep);
+            }
+        }
+
+        function skipWizard() {
+            finishWizard();
+        }
+
+        function finishWizard() {
+            wizardActive = false;
+            document.getElementById('couponWizardOverlay').classList.remove('active');
+            
+            // Remove highlights
+            document.querySelectorAll('.coupon-section-card').forEach(card => {
+                card.classList.remove('highlighted');
+            });
+
+            // Reset body overflow if modal is also closed
+            if (!document.getElementById('couponModal').classList.contains('active')) {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close wizard when clicking outside tooltip
+        document.getElementById('couponWizardOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                skipWizard();
+            }
+        });
+    </script>
+</body>
+</html>

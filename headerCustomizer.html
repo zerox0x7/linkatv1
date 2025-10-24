@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تخصيص الهيدر المتقدم</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#00e5bb',secondary:'#1e293b'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+background-color: #111827;
+color: #fff;
+font-family: 'Cairo', sans-serif;
+}
+.card {
+background-color: #1e293b;
+}
+input[type="range"]::-webkit-slider-thumb {
+appearance: none;
+width: 16px;
+height: 16px;
+background: #00e5bb;
+border-radius: 50%;
+cursor: pointer;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="bg-[#1e293b] py-4 px-6 flex items-center justify-between">
+<div class="flex items-center">
+<button class="w-8 h-8 flex items-center justify-center text-white">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+<div class="mr-4">
+<span class="text-white">AR</span>
+<i class="ri-global-line mr-1"></i>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="relative w-full max-w-xl">
+<input type="text" class="w-full bg-[#111827] text-white rounded-lg py-2 px-4 focus:outline-none focus:ring-1 focus:ring-primary" placeholder="بحث...">
+<button class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+<i class="ri-search-line"></i>
+</button>
+</div>
+</div>
+<div class="flex items-center">
+<h1 class="text-primary font-['Pacifico'] text-2xl">logo</h1>
+</div>
+</header>
+<div class="flex">
+<!-- Sidebar -->
+<aside class="w-64 bg-[#111827] border-l border-gray-700 h-screen sticky top-0 overflow-y-auto">
+<div class="p-4">
+<div class="flex items-center justify-between py-2 px-4 bg-[#1e293b] rounded-lg mb-4">
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+<i class="ri-user-line text-white"></i>
+</div>
+<span class="mr-2 text-sm">test33</span>
+</div>
+<button class="text-gray-400">
+<i class="ri-logout-box-line"></i>
+</button>
+</div>
+<ul class="space-y-1">
+<li>
+<a href="#" class="flex items-center justify-between py-2 px-4 rounded-lg hover:bg-[#1e293b]">
+<span>لوحة التحكم</span>
+<i class="ri-dashboard-line"></i>
+</a>
+</li>
+<li>
+<a href="#" class="flex items-center justify-between py-2 px-4 rounded-lg hover:bg-[#1e293b]">
+<span>إدارة المتجر</span>
+<i class="ri-store-line"></i>
+</a>
+</li>
+<li>
+<a href="#" class="flex items-center justify-between py-2 px-4 rounded-lg hover:bg-[#1e293b]">
+<span>إدارة واجهة المتجر</span>
+<i class="ri-layout-line"></i>
+</a>
+</li>
+<li>
+<a href="#" class="flex items-center justify-between py-2 px-4 rounded-lg bg-[#1e293b] text-primary">
+<span>تخصيص متقدم</span>
+<i class="ri-palette-line"></i>
+</a>
+</li>
+</ul>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6">
+<div class="flex justify-between items-center mb-6">
+<h1 class="text-2xl font-bold">تخصيص الهيدر المتقدم</h1>
+<button class="bg-primary text-[#111827] py-2 px-6 rounded-button font-medium hover:bg-opacity-90 whitespace-nowrap">
+حفظ التغييرات
+</button>
+</div>
+<p class="text-gray-400 mb-6">قم بتخصيص وتعديل محتوى الهيدر لمتجرك</p>
+<!-- Header Elements Section -->
+<div class="bg-[#1e293b] rounded-lg p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">عناصر الهيدر</h2>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-layout-top-line ri-lg"></i>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">شعار المتجر</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">قائمة التنقل</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">حقل البحث</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">سلة التسوق</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">زر تسجيل الدخول</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">مبدل اللغة</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Logo Customization -->
+<div class="bg-[#1e293b] rounded-lg p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">تخصيص الشعار</h2>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-image-line ri-lg"></i>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block mb-2">حجم الشعار</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="80" max="200" value="120" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="120" min="80" max="200" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2">المسافة البادئة</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="0" max="50" value="16" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="16" min="0" max="50" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2">موضع الشعار</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="bg-gray-700 hover:bg-gray-600 py-2 rounded-button whitespace-nowrap">يمين</button>
+<button class="bg-primary bg-opacity-20 text-primary py-2 rounded-button whitespace-nowrap border border-primary">وسط</button>
+<button class="bg-gray-700 hover:bg-gray-600 py-2 rounded-button whitespace-nowrap">يسار</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Custom Links Section -->
+<div class="bg-[#1e293b] rounded-lg p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">روابط مخصصة</h2>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-link ri-lg"></i>
+</div>
+</div>
+<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+<div class="bg-[#1e293b] rounded-lg p-6 max-w-sm w-full mx-4">
+<h3 class="text-xl font-semibold mb-4">تأكيد الحذف</h3>
+<p class="text-gray-300 mb-6">هل أنت متأكد من حذف هذا الرابط؟</p>
+<div class="flex justify-end space-x-4 space-x-reverse">
+<button id="cancelDelete" class="bg-gray-600 text-white py-2 px-4 rounded-button hover:bg-gray-500 whitespace-nowrap">إلغاء</button>
+<button id="confirmDelete" class="bg-red-500 text-white py-2 px-4 rounded-button hover:bg-red-400 whitespace-nowrap">تأكيد الحذف</button>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Existing Link -->
+<div class="bg-[#111827] rounded-lg p-4">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center">
+<div class="w-8 h-8 flex items-center justify-center text-primary">
+<i class="ri-coupon-line"></i>
+</div>
+<span class="mr-2 font-medium">العروض الخاصة</span>
+</div>
+<div class="flex items-center">
+<button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-300">
+<i class="ri-drag-move-line"></i>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-300">
+<i class="ri-edit-line"></i>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-400">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</div>
+<div class="flex items-center text-gray-400 text-sm">
+<span>الرابط: /special-offers</span>
+</div>
+</div>
+<!-- Existing Link -->
+<div class="bg-[#111827] rounded-lg p-4">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center">
+<div class="w-8 h-8 flex items-center justify-center text-primary">
+<i class="ri-customer-service-line"></i>
+</div>
+<span class="mr-2 font-medium">الدعم الفني</span>
+</div>
+<div class="flex items-center">
+<button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-300">
+<i class="ri-drag-move-line"></i>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-300">
+<i class="ri-edit-line"></i>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-400">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</div>
+<div class="flex items-center text-gray-400 text-sm">
+<span>الرابط: /support</span>
+</div>
+</div>
+<!-- Add New Link -->
+<div class="border border-dashed border-gray-600 rounded-lg p-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div>
+<label class="block mb-1 text-sm">نص الرابط</label>
+<input type="text" class="w-full bg-[#111827] border-none rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary" placeholder="أدخل نص الرابط">
+</div>
+<div>
+<label class="block mb-1 text-sm">الرابط URL</label>
+<input type="text" class="w-full bg-[#111827] border-none rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary" placeholder="أدخل عنوان URL">
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div>
+<label class="block mb-1 text-sm">الأيقونة</label>
+<div class="relative">
+<select class="w-full bg-[#111827] border-none rounded-lg py-2 pr-3 pl-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary">
+<option value="">اختر أيقونة</option>
+<option value="ri-home-line">الرئيسية</option>
+<option value="ri-store-line">المتجر</option>
+<option value="ri-coupon-line">العروض</option>
+<option value="ri-user-line">الحساب</option>
+<option value="ri-information-line">معلومات</option>
+</select>
+<div class="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-1 text-sm">لون الأيقونة</label>
+<div class="flex items-center space-x-2 space-x-reverse">
+<div class="w-8 h-8 rounded-full bg-primary cursor-pointer border-2 border-white"></div>
+<div class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer"></div>
+<div class="w-8 h-8 rounded-full bg-purple-500 cursor-pointer"></div>
+<div class="w-8 h-8 rounded-full bg-red-500 cursor-pointer"></div>
+<div class="w-8 h-8 rounded-full bg-yellow-500 cursor-pointer"></div>
+<div class="w-8 h-8 rounded-full bg-white cursor-pointer flex items-center justify-center text-[#111827]">
+<i class="ri-add-line"></i>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-end">
+<button class="bg-primary text-[#111827] py-2 px-4 rounded-button font-medium hover:bg-opacity-90 whitespace-nowrap">
+إضافة رابط
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Advanced Styling -->
+<div class="bg-[#1e293b] rounded-lg p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">تنسيق متقدم</h2>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-palette-line ri-lg"></i>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block mb-2">ارتفاع الهيدر</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="50" max="120" value="70" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="70" min="50" max="120" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2">شفافية الخلفية</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="0" max="100" value="100" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="100" min="0" max="100" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">%</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2">حجم خط القائمة</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="12" max="24" value="16" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="16" min="12" max="24" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2">تباعد عناصر القائمة</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="8" max="40" value="24" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="24" min="8" max="40" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6">
+<label class="block mb-2">نمط الهيدر</label>
+<div class="grid grid-cols-3 gap-3">
+<div class="border border-primary rounded-lg p-2 bg-[#111827] cursor-pointer">
+<div class="h-12 bg-[#1e293b] rounded mb-2 flex items-center justify-between px-2">
+<div class="w-6 h-6 bg-gray-500 rounded"></div>
+<div class="w-20 h-3 bg-gray-500 rounded"></div>
+</div>
+<p class="text-center text-xs">قياسي</p>
+</div>
+<div class="border border-gray-600 rounded-lg p-2 bg-[#111827] cursor-pointer">
+<div class="h-12 bg-[#1e293b] rounded mb-2 flex items-center px-2">
+<div class="w-6 h-6 bg-gray-500 rounded mr-2"></div>
+<div class="w-20 h-3 bg-gray-500 rounded"></div>
+</div>
+<p class="text-center text-xs">قائمة جانبية</p>
+</div>
+<div class="border border-gray-600 rounded-lg p-2 bg-[#111827] cursor-pointer">
+<div class="h-12 bg-[#1e293b] rounded mb-2 flex items-center justify-center">
+<div class="w-20 h-3 bg-gray-500 rounded"></div>
+</div>
+<p class="text-center text-xs">مركزي</p>
+</div>
+</div>
+</div>
+<div class="mt-6">
+<label class="block mb-2">لون خلفية الهيدر</label>
+<div class="grid grid-cols-6 gap-2">
+<div class="w-full h-10 bg-[#1e293b] rounded-lg cursor-pointer border-2 border-primary"></div>
+<div class="w-full h-10 bg-[#111827] rounded-lg cursor-pointer"></div>
+<div class="w-full h-10 bg-[#0f172a] rounded-lg cursor-pointer"></div>
+<div class="w-full h-10 bg-[#1e1e2d] rounded-lg cursor-pointer"></div>
+<div class="w-full h-10 bg-[#2d3748] rounded-lg cursor-pointer"></div>
+<div class="w-full h-10 rounded-lg cursor-pointer bg-gradient-to-r from-[#1e293b] to-[#0f172a] flex items-center justify-center">
+<i class="ri-add-line text-white"></i>
+</div>
+</div>
+</div>
+</div>
+<!-- Responsive Settings -->
+<div class="bg-[#1e293b] rounded-lg p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">إعدادات الاستجابة</h2>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-responsive-line ri-lg"></i>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">هيدر ثابت (Sticky)</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">تمكين القائمة المنسدلة على الموبايل</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer" checked>
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center">
+<span class="mr-2">إخفاء البحث على الموبايل</span>
+</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" class="sr-only peer">
+<div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-colors duration-300 ease-in-out"></div>
+</label>
+</div>
+<div>
+<label class="block mb-2">نقطة تحول الموبايل</label>
+<div class="flex items-center space-x-4 space-x-reverse">
+<input type="range" min="480" max="1024" value="768" step="8" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+<div class="flex items-center border border-gray-600 rounded-lg overflow-hidden">
+<input type="number" value="768" min="480" max="1024" step="8" class="w-16 bg-transparent border-none text-center py-1 text-sm focus:outline-none">
+<span class="px-2 py-1 bg-gray-700 text-sm">بكسل</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Preview Section -->
+<div class="bg-[#1e293b] rounded-lg p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-semibold">معاينة الهيدر</h2>
+<div class="flex items-center">
+<button id="mobilePreviewBtn" class="flex items-center bg-primary text-[#111827] py-2 px-4 rounded-button mr-2 whitespace-nowrap">
+<i class="ri-smartphone-line ml-1"></i>
+موبايل
+</button>
+<button id="desktopPreviewBtn" class="flex items-center bg-gray-700 py-2 px-4 rounded-button whitespace-nowrap">
+<i class="ri-computer-line ml-1"></i>
+سطح المكتب
+</button>
+</div>
+</div>
+<div class="border border-gray-700 rounded-lg overflow-hidden">
+<div class="bg-[#0f172a] p-1 flex items-center">
+<div class="w-3 h-3 rounded-full bg-red-500 ml-1"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500 ml-1"></div>
+<div class="w-3 h-3 rounded-full bg-green-500"></div>
+<div class="mx-auto text-xs text-gray-400">معاينة الهيدر</div>
+</div>
+<div id="headerPreview" class="bg-[#1e293b] p-3 flex items-center justify-between max-w-[375px] mx-auto transition-all duration-300">
+<div class="flex items-center">
+<button id="mobileMenuBtn" class="w-8 h-8 flex items-center justify-center text-white md:hidden">
+<i class="ri-menu-line"></i>
+</button>
+<h1 class="text-primary font-['Pacifico'] text-lg mr-2">logo</h1>
+<nav id="desktopNav" class="hidden">
+<ul class="flex items-center space-x-6 space-x-reverse mr-8">
+<li><a href="#" class="text-white hover:text-primary">الرئيسية</a></li>
+<li><a href="#" class="text-white hover:text-primary">المنتجات</a></li>
+<li><a href="#" class="text-white hover:text-primary">العروض الخاصة</a></li>
+<li><a href="#" class="text-white hover:text-primary">الدعم الفني</a></li>
+</ul>
+</nav>
+</div>
+<div class="flex items-center space-x-4 space-x-reverse">
+<div id="desktopSearch" class="hidden">
+<div class="relative">
+<input type="text" class="w-48 bg-[#111827] text-white rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="بحث...">
+<button class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+<i class="ri-search-line"></i>
+</button>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center text-white relative">
+<i class="ri-shopping-cart-line"></i>
+<span class="absolute -top-1 -left-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-[#111827]">3</span>
+</button>
+<button id="mobileSearchBtn" class="w-8 h-8 flex items-center justify-center text-white">
+<i class="ri-search-line"></i>
+</button>
+<div class="flex items-center text-sm">
+<span>AR</span>
+<i class="ri-global-line mr-1"></i>
+</div>
+</div>
+</div>
+<div id="previewContent" class="bg-[#111827] h-32 max-w-[375px] mx-auto flex items-center justify-center text-gray-500 transition-all duration-300">
+محتوى الصفحة
+</div>
+</div>
+</div>
+</main>
+</div>
+<script id="rangeInputHandlers">
+document.addEventListener('DOMContentLoaded', function() {
+const rangeInputs = document.querySelectorAll('input[type="range"]');
+rangeInputs.forEach(range => {
+const numberInput = range.parentElement.querySelector('input[type="number"]');
+if (numberInput) {
+// Sync range to number input
+range.addEventListener('input', () => {
+numberInput.value = range.value;
+});
+// Sync number input to range
+numberInput.addEventListener('input', () => {
+const value = parseInt(numberInput.value);
+const min = parseInt(numberInput.min);
+const max = parseInt(numberInput.max);
+if (value < min) numberInput.value = min;
+if (value > max) numberInput.value = max;
+range.value = numberInput.value;
+});
+}
+});
+});
+</script>
+<script id="toggleSwitchHandlers">
+document.addEventListener('DOMContentLoaded', function() {
+const deleteModal = document.getElementById('deleteConfirmModal');
+const cancelDeleteBtn = document.getElementById('cancelDelete');
+const confirmDeleteBtn = document.getElementById('confirmDelete');
+let currentDeleteBtn = null;
+let mobileMenuOpen = false;
+let mobileSearchOpen = false;
+const mobileMenu = document.createElement('div');
+mobileMenu.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
+mobileMenu.innerHTML = `
+  <div class="bg-[#1e293b] w-64 h-full p-4 transform transition-transform duration-300 -translate-x-full">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-primary font-['Pacifico'] text-xl">logo</h1>
+      <button class="mobile-menu-close w-8 h-8 flex items-center justify-center text-white">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <ul class="space-y-4">
+      <li><a href="#" class="text-white hover:text-primary block py-2">الرئيسية</a></li>
+      <li><a href="#" class="text-white hover:text-primary block py-2">المنتجات</a></li>
+      <li><a href="#" class="text-white hover:text-primary block py-2">العروض الخاصة</a></li>
+      <li><a href="#" class="text-white hover:text-primary block py-2">الدعم الفني</a></li>
+    </ul>
+  </div>
+`;
+document.body.appendChild(mobileMenu);
+const mobileSearchBar = document.createElement('div');
+mobileSearchBar.className = 'fixed top-0 left-0 right-0 bg-[#1e293b] p-3 transform transition-transform duration-300 -translate-y-full z-30';
+mobileSearchBar.innerHTML = `
+  <div class="relative">
+    <input type="text" class="w-full bg-[#111827] text-white rounded-lg py-2 px-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="بحث...">
+    <button class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 mobile-search-close">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+`;
+document.body.appendChild(mobileSearchBar);
+function createToast(message) {
+const toast = document.createElement('div');
+toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#1e293b] text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0 translate-y-4';
+toast.textContent = message;
+document.body.appendChild(toast);
+setTimeout(() => {
+toast.classList.remove('opacity-0', 'translate-y-4');
+}, 100);
+setTimeout(() => {
+toast.classList.add('opacity-0', 'translate-y-4');
+setTimeout(() => toast.remove(), 300);
+}, 3000);
+}
+document.addEventListener('click', function(e) {
+if (e.target.closest('.ri-delete-bin-line')) {
+currentDeleteBtn = e.target.closest('button');
+deleteModal.classList.remove('hidden');
+}
+});
+cancelDeleteBtn.addEventListener('click', function() {
+deleteModal.classList.add('hidden');
+currentDeleteBtn = null;
+});
+confirmDeleteBtn.addEventListener('click', function() {
+if (currentDeleteBtn) {
+const linkItem = currentDeleteBtn.closest('.bg-[#111827]');
+if (linkItem) {
+linkItem.remove();
+}
+}
+deleteModal.classList.add('hidden');
+currentDeleteBtn = null;
+});
+const toggleSwitches = document.querySelectorAll('input[type="checkbox"].sr-only');
+const mobilePreviewBtn = document.getElementById('mobilePreviewBtn');
+const desktopPreviewBtn = document.getElementById('desktopPreviewBtn');
+const headerPreview = document.getElementById('headerPreview');
+const previewContent = document.getElementById('previewContent');
+const desktopNav = document.getElementById('desktopNav');
+const desktopSearch = document.getElementById('desktopSearch');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+mobileMenuBtn.addEventListener('click', function() {
+  mobileMenuOpen = !mobileMenuOpen;
+  const menuPanel = mobileMenu.querySelector('div');
+  mobileMenu.classList.toggle('hidden');
+  if (mobileMenuOpen) {
+    setTimeout(() => {
+      menuPanel.classList.remove('-translate-x-full');
+    }, 10);
+  } else {
+    menuPanel.classList.add('-translate-x-full');
+    setTimeout(() => {
+      mobileMenu.classList.add('hidden');
+    }, 300);
+  }
+});
+mobileMenu.querySelector('.mobile-menu-close').addEventListener('click', function() {
+  mobileMenuOpen = false;
+  const menuPanel = mobileMenu.querySelector('div');
+  menuPanel.classList.add('-translate-x-full');
+  setTimeout(() => {
+    mobileMenu.classList.add('hidden');
+  }, 300);
+});
+mobileSearchBtn.addEventListener('click', function() {
+  mobileSearchOpen = !mobileSearchOpen;
+  if (mobileSearchOpen) {
+    mobileSearchBar.classList.remove('-translate-y-full');
+    mobileSearchBar.querySelector('input').focus();
+  } else {
+    mobileSearchBar.classList.add('-translate-y-full');
+  }
+});
+mobileSearchBar.querySelector('.mobile-search-close').addEventListener('click', function() {
+  mobileSearchOpen = false;
+  mobileSearchBar.classList.add('-translate-y-full');
+});
+toggleSwitches.forEach(toggle => {
+  toggle.addEventListener('change', function() {
+    const feature = this.parentElement.previousElementSibling.textContent.trim();
+    const toggleTrack = this.nextElementSibling;
+    if (this.checked) {
+      toggleTrack.classList.add('peer-checked:bg-primary');
+      toggleTrack.classList.remove('bg-gray-700');
+    } else {
+      toggleTrack.classList.remove('peer-checked:bg-primary');
+      toggleTrack.classList.add('bg-gray-700');
+    }
+createToast(`تم تحديث إعدادات ${feature} بنجاح`);
+// Update header preview based on the toggle
+const headerPreview = document.getElementById('headerPreview');
+const previewContent = document.getElementById('previewContent');
+switch(feature) {
+case 'هيدر ثابت (Sticky)':
+headerPreview.style.position = this.checked ? 'sticky' : 'static';
+headerPreview.style.top = this.checked ? '0' : 'auto';
+break;
+case 'تمكين القائمة المنسدلة على الموبايل':
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+mobileMenuBtn.style.display = this.checked ? 'flex' : 'none';
+break;
+case 'إخفاء البحث على الموبايل':
+const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+mobileSearchBtn.style.display = this.checked ? 'none' : 'flex';
+break;
+}
+});
+});
+function setMobileView() {
+headerPreview.classList.remove('max-w-full');
+headerPreview.classList.add('max-w-[375px]');
+previewContent.classList.remove('max-w-full');
+previewContent.classList.add('max-w-[375px]');
+desktopNav.classList.add('hidden');
+desktopSearch.classList.add('hidden');
+mobileMenuBtn.classList.remove('hidden');
+mobileSearchBtn.classList.remove('hidden');
+mobilePreviewBtn.classList.remove('bg-gray-700');
+mobilePreviewBtn.classList.add('bg-primary', 'text-[#111827]');
+desktopPreviewBtn.classList.remove('bg-primary', 'text-[#111827]');
+desktopPreviewBtn.classList.add('bg-gray-700');
+}
+function setDesktopView() {
+headerPreview.classList.remove('max-w-[375px]');
+headerPreview.classList.add('max-w-full');
+previewContent.classList.remove('max-w-[375px]');
+previewContent.classList.add('max-w-full');
+desktopNav.classList.remove('hidden');
+desktopSearch.classList.remove('hidden');
+mobileMenuBtn.classList.add('hidden');
+mobileSearchBtn.classList.add('hidden');
+desktopPreviewBtn.classList.remove('bg-gray-700');
+desktopPreviewBtn.classList.add('bg-primary', 'text-[#111827]');
+mobilePreviewBtn.classList.remove('bg-primary', 'text-[#111827]');
+mobilePreviewBtn.classList.add('bg-gray-700');
+}
+mobilePreviewBtn.addEventListener('click', setMobileView);
+desktopPreviewBtn.addEventListener('click', setDesktopView);
+setMobileView();
+});
+</script>
+</body>
+</html>

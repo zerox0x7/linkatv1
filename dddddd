@@ -1,0 +1,261 @@
+    
+    CREATE TABLE `categories` (
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+    `store_id` int DEFAULT NULL,
+    `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `description` text COLLATE utf8mb4_unicode_ci,
+    `is_active` tinyint(1) DEFAULT '1',
+    `is_featured` tinyint(1) DEFAULT '0',
+    `sort_order` int DEFAULT '0',
+    `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'account',
+    `parent_id` bigint unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `show_in_homepage` tinyint(1) DEFAULT '0',
+    `homepage_order` int DEFAULT NULL,
+    `order` int DEFAULT '0',
+    `text_color` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `bg_color` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `categories_slug_unique` (`slug`),
+    KEY `categories_parent_id_foreign` (`parent_id`),
+    CONSTRAINT `categories_parent_id_foreign` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 57 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    بالطبع سأوضح لك بالتفصيل أي الأعمدة يجب إدراجها في صفحة إنشاء المنتج وأيها لا:
+
+    الأعمدة التي يجب إدراجها في صفحة إنشاء المنتج:
+    coupon_eligible - نعم، يجب إدراجها
+    لأن التاجر يحتاج لتحديد من البداية إذا كان المنتج مؤهل للكوبونات أم لا (خاصة المنتجات المخفضة أو بطاقات الهدايا)
+    
+    coupon_categories - نعم، يجب إدراجها
+    لأن التاجر يحتاج لتصنيف المنتج ضمن فئات الكوبونات المناسبة منذ البداية
+    
+    excluded_coupon_types - نعم، يجب إدراجها
+    لأن بعض المنتجات قد تحتاج استثناءات معينة من أنواع الكوبونات منذ إنشائها
+    
+    الأعمدة التي يفضل عدم إدراجها في صفحة إنشاء المنتج:
+    min_coupon_order_value - لا، يفضل إدراجها في صفحة منفصلة
+    لأنها تتعلق بإعدادات تسويقية متقدمة وليس بالمنتج نفسه
+    
+    max_coupon_discount_amount - لا، صفحة منفصلة أفضل
+    لأنها قد تتغير حسب الحملات التسويقية والظروف المالية
+    
+    max_coupon_discount_percentage - لا، صفحة منفصلة أفضل
+    نفس السبب السابق
+    
+    allow_coupon_stacking - لا، صفحة منفصلة أفضل
+    لأنها إعداد متقدم لا يحتاجه معظم التجار في البداية
+    
+    coupon_start_date & coupon_end_date - لا، صفحة منفصلة أفضل
+    لأنها تتعلق بحملات موسمية مؤقتة وليس بطبيعة المنتج الأساسية
+    
+    التوصية:
+    اجعل صفحة إنشاء المنتج بسيطة تحتوي على الأساسيات فقط، وأنشئ صفحة "إعدادات الكوبونات المتقدمة" منفصلة للباقي.
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- Featured Categories -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <section class="py-16 bg-gray-900">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-white mb-12 text-center">الفئات المميزة</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            @foreach($homeSections as $section)
+
+
+            <div class="bg-gray-800 shadow-[5px_4px_6px_-6px_rgba(0,_0,_0,_0.7)] rounded-lg overflow-hidden transition-transform duration-300 hover:transform hover:scale-105">
+                    @if($section->image)
+                    <!-- waitforyou -->
+                    <img class="h-48 bg-cover bg-center w-full" src="{{ $section->image }}">  
+                    @else
+                    <img class="h-48 bg-cover bg-center w-full" src="https://readdy.ai/api/search-image?query=video%20game%20controller%20with%20vibrant%20blue%20lighting%20against%20dark%20background%2C%20professional%20gaming%20equipment%2C%20high-quality%20rendering&width=400&height=300&seq=12346&orientation=landscape">
+                    @endif
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2"> {{ $section->title }} </h3>
+                        <p class="text-gray-300 mb-4"> {{ $section->subtitle }} </p>
+                        <a href="#" class="text-primary font-medium flex items-center">
+                            <span>تصفح الآن</span>
+                            <i class="ri-arrow-left-line mr-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+
+            @endforeach
+            
+
+            </div>
+        </div>
+    </section>
+    
+
+
+    <!-- Featured Products -->
+    <section class="py-16 bg-gray-800">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl font-bold text-white">المنتجات المميزة</h2>
+                <a href="#" class="text-primary font-medium flex items-center">
+                    <span>عرض الكل</span>
+                    <i class="ri-arrow-left-line mr-2"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Product 1 -->
+
+             @if($featuredProducts->count() > 0)
+              @foreach($featuredProducts as $product)
+                <div class="bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                
+                     <div class="h-40 sm:h-48 bg-gradient-to-b from-[#1e1e1e] to-[#121212]" style="background-image: url('{{ $product->image_url }}'); background-size: cover; background-position: center;"></div>
+                        
+                    <div class="p-3 gap-1 sm:p-4 flex flex-col flex-grow">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class=" bg-{{$product->category->text_color}}/20 text-{{$product->category->text_color}} px-3 py-1 rounded-full text-sm font-medium  ">
+                                
+                            {{ $product->category ? $product->category->name : 'عام' }}
+                        </span>
+                            <div class="flex items-center">
+                                <i class="ri-star-fill text-yellow-400"></i>
+                                <span class="text-gray-300  mr-1">{{$product->rating}}</span>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-white mb-2 ">{{$product->name}}</h3>
+                        <p class="text-gray-400 mb-4  ">{{ substr($product->meta_description, 0, 60)  }}</p> 
+                         
+                        <div class="flex justify-between items-center ">
+                           <div class="mt-auto">
+                            <div class="mb-3">
+                                @if($product->has_discounts)
+                                <div class="text-primary font-bold text-xl">{{ $product->display_price }} ر.س</div>
+                                <div class="text-gray-400 text-sm line-through">{{ $product->display_old_price }} ر.س</div>
+                                @else
+                                <div class="text-primary font-bold text-xl">{{ $product->display_price }} ر.س</div>
+                                @endif
+                            </div>
+                            
+                        </div>
+                            <button class="bg-primary text-white p-2 rounded-full w-10 h-10 flex items-center justify-center whitespace-nowrap !rounded-button">
+                                <i class="ri-shopping-cart-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
+            @else
+<!-- code if not -->
+            @endif
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="py-16 bg-gray-900">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-white mb-12 text-center">{{$reviewsSection->name}} </h2>
+            
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+
+
+                 @foreach($reviews as $review)
+                <div class="glass-effect p-8 rounded-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
+                            <i class="ri-user-line text-primary ri-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-white"> {{ $review->name ? mb_substr($review->name, 0, 12) : 'م' }}</h4>
+                          <div class="flex text-yellow-400 mb-3">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    @if($i <= $review->rating)
+                                                        <i class="ri-star-fill"></i>
+                                                    @elseif($i - 0.5 == $review->rating)
+                                                        <i class="ri-star-half-fill"></i>
+                                                    @else
+                                                        <i class="ri-star-line"></i>
+                                                    @endif
+                                                @endfor
+                                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300">{{ $review->review }} </p>
+                </div>
+                @endforeach
+
+            </div>
+        </div>
+    </section>
+    
+    <!-- Newsletter -->
+    <section class="py-16 bg-gray-800 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-0 left-0 w-full h-full" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.4\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        </div>
+        
+        <div class="container mx-auto relative z-10">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-white mb-4">اشترك في نشرتنا الإخبارية</h2>
+                <p class="text-gray-300 mb-8">احصل على آخر العروض والتحديثات مباشرة إلى بريدك الإلكتروني</p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <input type="email" placeholder="أدخل بريدك الإلكتروني" class="bg-gray-700 text-white py-3 px-6 rounded-button border-none flex-grow max-w-md">
+                    <button class="gradient-btn text-white py-3 px-8 rounded-button font-medium whitespace-nowrap">
+                        اشترك الآن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
