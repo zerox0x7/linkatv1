@@ -162,6 +162,18 @@ class ResponsiveImageService
             foreach ($paths as $path) {
                 if (is_string($path)) {
                     Storage::disk($disk)->delete($path);
+                    
+                    // Also delete the _original copy if it exists
+                    $pathInfo = pathinfo($path);
+                    $directory = $pathInfo['dirname'] ?? '';
+                    $filename = $pathInfo['filename'] ?? '';
+                    $extension = $pathInfo['extension'] ?? '';
+                    
+                    // Only proceed if we have an extension
+                    if ($extension && !str_ends_with($filename, '_original')) {
+                        $originalPath = $directory . '/' . $filename . '_original.' . $extension;
+                        Storage::disk($disk)->delete($originalPath);
+                    }
                 }
             }
         }
