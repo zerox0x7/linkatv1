@@ -309,6 +309,48 @@
                          </div>
                          <span class="font-medium">تخصيص الثيم النشط</span>
                      </a>
+                    <a href="{{ route('admin.themes.layout-builder') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.layout-builder') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-layout-grid-line text-sm {{ request()->routeIs('admin.themes.layout-builder') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">منشئ التخطيط</span>
+                    </a>
+                    <a href="{{ route('admin.themes.home-customize') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.home-customize') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-home-5-line text-sm {{ request()->routeIs('admin.themes.home-customize') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">تخصيص الصفحة الرئيسية</span>
+                    </a>
+                    <a href="{{ route('admin.themes.custom-code') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.custom-code') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-code-line text-sm {{ request()->routeIs('admin.themes.custom-code') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">الأكواد المخصصة</span>
+                    </a>
+                    <a href="{{ route('admin.themes.custom-data') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.custom-data') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-database-2-line text-sm {{ request()->routeIs('admin.themes.custom-data') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">البيانات المخصصة</span>
+                    </a>
+                    <a href="{{ route('admin.themes.media') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.media') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-image-2-line text-sm {{ request()->routeIs('admin.themes.media') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">الوسائط</span>
+                    </a>
+                    <a href="{{ route('admin.themes.sections-control') }}"
+                        class="flex items-center gap-3 {{ request()->routeIs('admin.themes.sections-control') ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary' : 'bg-[#0f1623] border-[#2a3548] text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:border-primary/30 hover:text-white' }} p-3 rounded-lg border transition-all duration-300 group shadow-md hover:shadow-lg">
+                        <div class="w-6 h-6 rounded bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <i class="ri-layout-2-line text-sm {{ request()->routeIs('admin.themes.sections-control') ? 'text-primary' : 'text-purple-400 group-hover:text-primary' }} transition-colors"></i>
+                        </div>
+                        <span class="font-medium">التحكم في الأقسام</span>
+                    </a>
                  </div>
              </div>
          </div>

@@ -208,6 +208,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','customer'])->group(f
     Route::prefix('themes')->name('themes.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('index');
         Route::get('/customize', [\App\Http\Controllers\Admin\ThemeController::class, 'customize'])->name('customize');
+        Route::get('/home-customize', [\App\Http\Controllers\Admin\ThemeController::class, 'customizeHome'])->name('home-customize');
+        Route::get('/layout-builder', [\App\Http\Controllers\Admin\ThemeController::class, 'layoutBuilder'])->name('layout-builder');
+        Route::get('/sections-control', [\App\Http\Controllers\Admin\ThemeController::class, 'sectionsControl'])->name('sections-control');
+        Route::get('/custom-code', [\App\Http\Controllers\Admin\ThemeController::class, 'customCodePage'])->name('custom-code');
+        Route::get('/custom-data', [\App\Http\Controllers\Admin\ThemeController::class, 'customDataPage'])->name('custom-data');
+        Route::get('/media', [\App\Http\Controllers\Admin\ThemeController::class, 'mediaPage'])->name('media');
         Route::post('/update', [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('update');
         Route::post('/switch', [\App\Http\Controllers\Admin\ThemeController::class, 'switchTheme'])->name('switch');
         Route::delete('/delete-image', [\App\Http\Controllers\Admin\ThemeController::class, 'deleteImage'])->name('delete-image');

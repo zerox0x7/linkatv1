@@ -71,6 +71,136 @@ class ThemeController extends Controller
     }
 
     /**
+     * Display home page customization for active theme
+     */
+    public function customizeHome()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+        return view('themes.admin.theme.home', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Display layout builder page for active theme
+     */
+    public function layoutBuilder()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+
+        return view('themes.admin.theme.layout-builder', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Display sections control page for active theme
+     */
+    public function sectionsControl()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+
+        return view('themes.admin.theme.sections-control', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Display custom code page for active theme
+     */
+    public function customCodePage()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+
+        return view('themes.admin.theme.custom-code', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Display custom data page for active theme
+     */
+    public function customDataPage()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+
+        return view('themes.admin.theme.custom-data', compact('activeTheme', 'themeData'));
+    }
+
+    /**
+     * Display media page for active theme
+     */
+    public function mediaPage()
+    {
+        $activeTheme = Setting::get('active_theme', 'default');
+        $storeId = auth()->user()->store_id ?? null;
+        $themeData = ThemeData::where('store_id', $storeId)
+            ->where('theme_name', $activeTheme)
+            ->first();
+
+        if (!$themeData) {
+            $themeData = ThemeData::create([
+                'store_id' => $storeId,
+                'theme_name' => $activeTheme,
+                'is_active' => true,
+            ]);
+        }
+
+        return view('themes.admin.theme.media', compact('activeTheme', 'themeData'));
+    }
+
+    /**
      * Update theme customization data
      *
      * @param Request $request
