@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Services\BunnyStorage;
 use Illuminate\Support\Facades\Validator;
 
 class ImageUploadController extends Controller
@@ -71,21 +72,31 @@ class ImageUploadController extends Controller
         
         // حذف الصورة القديمة إذا كانت موجودة
         if ($oldImage) {
-            $oldImagePath = 'storage/' . $oldImage;
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
-            }
+            $this->deleteImage($oldImage);
         }
         
         // إنشاء اسم عشوائي للملف
         $fileName = Str::random(40) . '.' . $validation['extension'];
         
         // رفع الصورة
+        $relativePath = trim($directory, '/').'/' . $fileName;
+        /** @var BunnyStorage $bunny */
+        $bunny = app(BunnyStorage::class);
+        if ($bunny->isConfigured()) {
+            $url = $bunny->uploadUploadedFile($file, $relativePath);
+            if ($url) {
+                return [
+                    'success' => true,
+                    'path' => $relativePath,
+                    'url' => $url,
+                ];
+            }
+        }
         $file->move(public_path('storage/' . $directory), $fileName);
-        
         return [
             'success' => true,
-            'path' => $directory . '/' . $fileName
+            'path' => $relativePath,
+            'url' => url('storage/'.$relativePath),
         ];
     }
 
@@ -111,9 +122,18 @@ class ImageUploadController extends Controller
             $fileName = Str::random(40) . '.' . $validation['extension'];
             
             // رفع الصورة
+            $relativePath = trim($directory, '/').'/'.$fileName;
+            /** @var BunnyStorage $bunny */
+            $bunny = app(BunnyStorage::class);
+            if ($bunny->isConfigured()) {
+                $url = $bunny->uploadUploadedFile($file, $relativePath);
+                if ($url) {
+                    $uploadedPaths[] = $relativePath;
+                    continue;
+                }
+            }
             $file->move(public_path('storage/' . $directory), $fileName);
-            
-            $uploadedPaths[] = $directory . '/' . $fileName;
+            $uploadedPaths[] = $relativePath;
         }
         
         return [
@@ -130,6 +150,11 @@ class ImageUploadController extends Controller
      */
     public function deleteImage($imagePath)
     {
+        /** @var BunnyStorage $bunny */
+        $bunny = app(BunnyStorage::class);
+        if ($bunny->isConfigured()) {
+            return $bunny->delete($imagePath);
+        }
         $fullPath = public_path('storage/' . $imagePath);
         if (file_exists($fullPath)) {
             return unlink($fullPath);

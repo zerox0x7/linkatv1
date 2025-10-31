@@ -50,6 +50,15 @@
 </style>
 
 @php
+    // Helper function to get image URL (Bunny.net or local storage)
+    $getImageUrl = function($imagePath) {
+        if (!$imagePath) return null;
+        
+        // Use ResponsiveImageService to get correct URL (Bunny or local)
+        $imageService = app(\App\Services\ResponsiveImageService::class);
+        return $imageService->getImageUrl($imagePath);
+    };
+    
     // Dump theme data passed from controller
     // Map hero slides by their order key for proper positioning
     $heroSlides = [];
@@ -116,11 +125,11 @@
                             $imagePath = is_array($imageData) 
                                 ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                 : $imageData;
-                            $backgroundImage = asset('storage/' . $imagePath);
+                            $backgroundImage = $getImageUrl($imagePath);
                         } elseif (isset($homePage)) {
                             $backgroundImage = $homePage->hero_image 
-                                ? asset('storage/' . $homePage->hero_image) 
-                                : ($homePage->hero_background_image ? asset('storage/' . $homePage->hero_background_image) : asset('themes/torganic/assets/images/banner/home2/1.png'));
+                                ? $getImageUrl($homePage->hero_image) 
+                                : ($homePage->hero_background_image ? $getImageUrl($homePage->hero_background_image) : asset('themes/torganic/assets/images/banner/home2/1.png'));
                         } else {
                             $backgroundImage = asset('themes/torganic/assets/images/banner/home2/1.png');
                         }
@@ -167,7 +176,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide2Background = asset('storage/' . $imagePath);
+                                $slide2Background = $getImageUrl($imagePath);
                             } else {
                                 $slide2Background = asset('themes/torganic/assets/images/banner/home2/2.png');
                             }
@@ -197,7 +206,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide3Background = asset('storage/' . $imagePath);
+                                $slide3Background = $getImageUrl($imagePath);
                             } else {
                                 $slide3Background = asset('themes/torganic/assets/images/banner/home2/3.png');
                             }
@@ -462,7 +471,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide4Image = asset('storage/' . $imagePath);
+                                $slide4Image = $getImageUrl($imagePath);
                             } else {
                                 $slide4Image = asset('themes/torganic/assets/images/product/sale-banner/5.png');
                             }
@@ -492,7 +501,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide5Image = asset('storage/' . $imagePath);
+                                $slide5Image = $getImageUrl($imagePath);
                             } else {
                                 $slide5Image = asset('themes/torganic/assets/images/product/sale-banner/4.png');
                             }
@@ -525,7 +534,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide6Image = asset('storage/' . $imagePath);
+                                $slide6Image = $getImageUrl($imagePath);
                             } else {
                                 $slide6Image = asset('themes/torganic/assets/images/product/sale-banner/6.png');
                             }
@@ -881,7 +890,7 @@
                                         $imagePath = is_array($imageData) 
                                             ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                             : $imageData;
-                                        $slide7Image = asset('storage/' . $imagePath);
+                                        $slide7Image = $getImageUrl($imagePath);
                                     } else {
                                         $slide7Image = asset('themes/torganic/assets/images/product/sale-banner/2.png');
                                     }
@@ -910,7 +919,7 @@
                                         $imagePath = is_array($imageData) 
                                             ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                             : $imageData;
-                                        $slide8Image = asset('storage/' . $imagePath);
+                                        $slide8Image = $getImageUrl($imagePath);
                                     } else {
                                         $slide8Image = asset('themes/torganic/assets/images/product/sale-banner/3.png');
                                     }
@@ -1309,7 +1318,7 @@
                                 $imagePath = is_array($imageData) 
                                     ? ($imageData['large'] ?? $imageData['original'] ?? reset($imageData))
                                     : $imageData;
-                                $slide9Image = asset('storage/' . $imagePath);
+                                $slide9Image = $getImageUrl($imagePath);
                             } else {
                                 $slide9Image = asset('themes/torganic/assets/images/product/sale-banner/1.png');
                             }

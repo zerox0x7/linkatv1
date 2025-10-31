@@ -94,12 +94,12 @@ class ThemeCustomizer extends Component
         foreach ($this->heroSlides as $index => $slide) {
             if (isset($slide['image'])) {
                 // Check if it's an array (responsive images) or string (old format)
+                $imageService = $this->getImageService();
                 if (is_array($slide['image'])) {
-                    $imageService = $this->getImageService();
                     $bestSize = $imageService->getBestSize($slide['image'], 'hero');
-                    $this->heroSlides[$index]['image_preview'] = Storage::url($bestSize);
+                    $this->heroSlides[$index]['image_preview'] = $imageService->getImageUrl($bestSize);
                 } else {
-                    $this->heroSlides[$index]['image_preview'] = Storage::url($slide['image']);
+                    $this->heroSlides[$index]['image_preview'] = $imageService->getImageUrl($slide['image']);
                 }
             }
         }
@@ -113,7 +113,8 @@ class ThemeCustomizer extends Component
         $this->bannerDescription = $bannerData['description'] ?? '';
         $this->bannerLink = $bannerData['link'] ?? '';
         if (isset($bannerData['main_image'])) {
-            $this->bannerImagePreview = Storage::url($bannerData['main_image']);
+            $imageService = $this->getImageService();
+            $this->bannerImagePreview = $imageService->getImageUrl($bannerData['main_image']);
         }
         
         // Load custom data
@@ -654,7 +655,7 @@ class ThemeCustomizer extends Component
             'button_text' => $this->newHeroSlide['button_text'],
             'button_link' => $this->newHeroSlide['button_link'],
             'image' => $imagePaths, // Store array of all sizes
-            'image_preview' => Storage::url($previewPath),
+            'image_preview' => $imageService->getImageUrl($previewPath),
             'order' => count($this->heroSlides),
         ];
         
@@ -717,7 +718,7 @@ class ThemeCustomizer extends Component
             $previewPath = $imageService->getBestSize($imagePaths, 'hero');
             
             $this->heroSlides[$this->editingSlideIndex]['image'] = $imagePaths;
-            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = Storage::url($previewPath);
+            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = $imageService->getImageUrl($previewPath);
         }
         
         // Save

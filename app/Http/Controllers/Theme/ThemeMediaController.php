@@ -444,8 +444,25 @@ class ThemeMediaController extends Controller
             
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs("stores/{$storeId}/media", $fileName, 'public');
-            $fileUrl = Storage::url($filePath);
+            $relativePath = "stores/{$storeId}/media/{$fileName}";
+
+            $bunny = app(\App\Services\BunnyStorage::class);
+            if ($bunny->isConfigured()) {
+                $uploadedUrl = $bunny->uploadUploadedFile($file, $relativePath);
+                if ($uploadedUrl) {
+                    $filePath = $relativePath;
+                    $fileUrl = $uploadedUrl;
+                } else {
+                    // Fallback to local if Bunny upload fails
+                    $stored = $file->storeAs("stores/{$storeId}/media", $fileName, 'public');
+                    $filePath = $stored;
+                    $fileUrl = Storage::url($stored);
+                }
+            } else {
+                $stored = $file->storeAs("stores/{$storeId}/media", $fileName, 'public');
+                $filePath = $stored;
+                $fileUrl = Storage::url($stored);
+            }
             
             // Get image dimensions if it's an image
             $dimensions = null;

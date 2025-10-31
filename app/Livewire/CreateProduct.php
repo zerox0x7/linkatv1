@@ -280,10 +280,24 @@ class CreateProduct extends Component
     {
         if ($this->tempMainImagePath) {
             $finalPath = 'products/' . $this->store_id . '/main/' . basename($this->tempMainImagePath);
-            
-            // Move from temp to final location
+            $bunny = app(\App\Services\BunnyStorage::class);
+            if ($bunny->isConfigured()) {
+                $absolute = storage_path('app/public/'.$this->tempMainImagePath);
+                $url = $bunny->uploadLocalPath($absolute, $finalPath);
+                if ($url) {
+                    // Bunny upload succeeded; clean up temp
+                    Storage::disk('public')->delete($this->tempMainImagePath);
+                    $this->tempMainImagePath = null;
+                    return $finalPath;
+                }
+                // Bunny failed; fall back to local move without losing the file
+                Storage::disk('public')->move($this->tempMainImagePath, $finalPath);
+                $this->tempMainImagePath = null;
+                return $finalPath;
+            }
+            // Fallback to local move
             Storage::disk('public')->move($this->tempMainImagePath, $finalPath);
-            
+            $this->tempMainImagePath = null;
             return $finalPath;
         }
         
@@ -297,11 +311,23 @@ class CreateProduct extends Component
         foreach ($this->tempGalleryPaths as $tempPath) {
             if ($tempPath) {
                 $finalPath = 'products/' . $this->store_id . '/gallery/' . basename($tempPath);
-                
-                // Move from temp to final location
-                Storage::disk('public')->move($tempPath, $finalPath);
-                
-                $galleryPaths[] = $finalPath;
+                $bunny = app(\App\Services\BunnyStorage::class);
+                if ($bunny->isConfigured()) {
+                    $absolute = storage_path('app/public/'.$tempPath);
+                    $url = $bunny->uploadLocalPath($absolute, $finalPath);
+                    if ($url) {
+                        // Bunny upload succeeded
+                        Storage::disk('public')->delete($tempPath);
+                        $galleryPaths[] = $finalPath;
+                    } else {
+                        // Bunny failed; move locally
+                        Storage::disk('public')->move($tempPath, $finalPath);
+                        $galleryPaths[] = $finalPath;
+                    }
+                } else {
+                    Storage::disk('public')->move($tempPath, $finalPath);
+                    $galleryPaths[] = $finalPath;
+                }
             }
         }
         

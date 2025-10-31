@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'bunny' => [
+        'storage_zone' => env('BUNNY_STORAGE_ZONE'),
+        'api_key' => env('BUNNY_API_KEY'),
+        'region' => env('BUNNY_REGION'), // e.g. "ny", "la", "sg", "de"; leave empty for global
+        'pull_zone_url' => env('BUNNY_PULL_ZONE_URL'), // e.g. https://your-pullzone.b-cdn.net
+    ],
+
 ];

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ThemesInfo;
+use App\Services\BunnyStorage;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -139,7 +140,35 @@ class ResponsiveImageService
         // Encode the image
         $encoded = $resizedImage->encode();
         
-        // Save to storage
+        // Try to upload to Bunny.net if configured
+        $bunny = app(BunnyStorage::class);
+        if ($bunny->isConfigured()) {
+            // Create a temporary file for the encoded image
+            $tempPath = sys_get_temp_dir() . '/' . uniqid() . '_' . $filename;
+            file_put_contents($tempPath, (string) $encoded);
+            
+            try {
+                // Upload to Bunny.net
+                $bunnyUrl = $bunny->uploadLocalPath($tempPath, $path);
+                
+                // Clean up temp file
+                @unlink($tempPath);
+                
+                if ($bunnyUrl) {
+                    // Upload successful, return the path for Bunny.net
+                    return $path;
+                }
+            } catch (\Exception $e) {
+                // If Bunny upload fails, clean up temp file and fall back to local
+                @unlink($tempPath);
+                \Log::warning('Bunny upload failed in ResponsiveImageService, falling back to local storage', [
+                    'error' => $e->getMessage(),
+                    'path' => $path
+                ]);
+            }
+        }
+        
+        // Fallback to local storage
         Storage::disk($disk)->put($path, (string) $encoded);
         
         return $path;
@@ -154,26 +183,40 @@ class ResponsiveImageService
      */
     public function deleteResponsiveImages($paths, $disk = 'public')
     {
+        $bunny = app(BunnyStorage::class);
+        $useBunny = $bunny->isConfigured();
+        
         if (is_string($paths)) {
             // Single path - try to find and delete all related sizes
-            $this->deleteSingleImageAllSizes($paths, $disk);
+            $this->deleteSingleImageAllSizes($paths, $disk, $useBunny, $bunny);
         } elseif (is_array($paths)) {
-            // Array of paths - delete each one
-            foreach ($paths as $path) {
-                if (is_string($path)) {
-                    Storage::disk($disk)->delete($path);
+            // Array of paths - get unique paths to avoid duplicate deletions
+            $uniquePaths = array_unique(array_filter($paths, 'is_string'));
+            
+            // Delete each unique path
+            foreach ($uniquePaths as $path) {
+                // Try to delete from Bunny.net first if configured
+                if ($useBunny) {
+                    $bunny->delete($path);
+                }
+                
+                // Also delete from local storage
+                Storage::disk($disk)->delete($path);
+                
+                // Also delete the _original copy if it exists
+                $pathInfo = pathinfo($path);
+                $directory = $pathInfo['dirname'] ?? '';
+                $filename = $pathInfo['filename'] ?? '';
+                $extension = $pathInfo['extension'] ?? '';
+                
+                // Only proceed if we have an extension
+                if ($extension && !str_ends_with($filename, '_original')) {
+                    $originalPath = $directory . '/' . $filename . '_original.' . $extension;
                     
-                    // Also delete the _original copy if it exists
-                    $pathInfo = pathinfo($path);
-                    $directory = $pathInfo['dirname'] ?? '';
-                    $filename = $pathInfo['filename'] ?? '';
-                    $extension = $pathInfo['extension'] ?? '';
-                    
-                    // Only proceed if we have an extension
-                    if ($extension && !str_ends_with($filename, '_original')) {
-                        $originalPath = $directory . '/' . $filename . '_original.' . $extension;
-                        Storage::disk($disk)->delete($originalPath);
+                    if ($useBunny) {
+                        $bunny->delete($originalPath);
                     }
+                    Storage::disk($disk)->delete($originalPath);
                 }
             }
         }
@@ -184,10 +227,16 @@ class ResponsiveImageService
      * 
      * @param string $path
      * @param string $disk
+     * @param bool $useBunny
+     * @param BunnyStorage|null $bunny
      * @return void
      */
-    protected function deleteSingleImageAllSizes($path, $disk = 'public')
+    protected function deleteSingleImageAllSizes($path, $disk = 'public', $useBunny = false, $bunny = null)
     {
+        if ($useBunny && $bunny === null) {
+            $bunny = app(BunnyStorage::class);
+        }
+        
         // Extract path info
         $pathInfo = pathinfo($path);
         $directory = $pathInfo['dirname'];
@@ -199,10 +248,20 @@ class ResponsiveImageService
         
         foreach ($suffixes as $suffix) {
             $possiblePath = $directory . '/' . str_replace($suffix, '', $filename) . $suffix . '.' . $extension;
+            
+            // Try to delete from Bunny.net first if configured
+            if ($useBunny && $bunny) {
+                $bunny->delete($possiblePath);
+            }
+            
+            // Also delete from local storage
             Storage::disk($disk)->delete($possiblePath);
         }
         
         // Also try to delete the original path
+        if ($useBunny && $bunny) {
+            $bunny->delete($path);
+        }
         Storage::disk($disk)->delete($path);
     }
     
@@ -222,7 +281,7 @@ class ResponsiveImageService
         
         foreach ($this->sizes as $sizeName => $maxWidth) {
             if ($maxWidth && isset($paths[$sizeName])) {
-                $url = Storage::url($paths[$sizeName]);
+                $url = $this->getImageUrl($paths[$sizeName]);
                 $srcset[] = $url . ' ' . $maxWidth . 'w';
             }
         }
@@ -238,6 +297,25 @@ class ResponsiveImageService
     public function getSizesAttribute()
     {
         return '(max-width: 150px) 150px, (max-width: 480px) 480px, (max-width: 768px) 768px, 1200px';
+    }
+    
+    /**
+     * Get the URL for an image path (Bunny.net or local storage)
+     * 
+     * @param string $path The image path
+     * @return string The full URL to the image
+     */
+    public function getImageUrl($path)
+    {
+        // Try to use Bunny.net if configured
+        $bunny = app(BunnyStorage::class);
+        if ($bunny->isConfigured()) {
+            // Return Bunny.net public URL
+            return $bunny->publicUrl($path);
+        }
+        
+        // Fallback to local storage URL
+        return Storage::url($path);
     }
     
     /**

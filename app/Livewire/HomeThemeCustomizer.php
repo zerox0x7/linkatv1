@@ -61,12 +61,12 @@ class HomeThemeCustomizer extends Component
 
         foreach ($this->heroSlides as $index => $slide) {
             if (isset($slide['image'])) {
+                $imageService = $this->getImageService();
                 if (is_array($slide['image'])) {
-                    $imageService = $this->getImageService();
                     $bestSize = $imageService->getBestSize($slide['image'], 'hero');
-                    $this->heroSlides[$index]['image_preview'] = Storage::url($bestSize);
+                    $this->heroSlides[$index]['image_preview'] = $imageService->getImageUrl($bestSize);
                 } else {
-                    $this->heroSlides[$index]['image_preview'] = Storage::url($slide['image']);
+                    $this->heroSlides[$index]['image_preview'] = $imageService->getImageUrl($slide['image']);
                 }
             }
         }
@@ -121,7 +121,7 @@ class HomeThemeCustomizer extends Component
             'button_text' => $this->newHeroSlide['button_text'],
             'button_link' => $this->newHeroSlide['button_link'],
             'image' => $imagePaths,
-            'image_preview' => Storage::url($previewPath),
+            'image_preview' => $imageService->getImageUrl($previewPath),
             'order' => count($this->heroSlides),
         ];
 
@@ -174,7 +174,7 @@ class HomeThemeCustomizer extends Component
             $previewPath = $imageService->getBestSize($imagePaths, 'hero');
 
             $this->heroSlides[$this->editingSlideIndex]['image'] = $imagePaths;
-            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = Storage::url($previewPath);
+            $this->heroSlides[$this->editingSlideIndex]['image_preview'] = $imageService->getImageUrl($previewPath);
         }
 
         $this->saveHeroSlides();
